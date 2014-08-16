@@ -25,6 +25,15 @@
             .listview-wrapper {
                 width: 100% !important;
             }
+            .ajaxLoader {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                margin-top: -24px;
+                margin-left: -24px;
+                z-index: 1000;
+                display: none;
+            }
         </style>
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
         <script type="text/javascript" src="js/jquery-2.1.1.js"></script> 
@@ -35,6 +44,34 @@
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/gsgenius.js"></script>
 
+        <script>
+            $(document).on( "mobileinit", function() {
+                console.log('mobileinit started.');
+                alert('mobileinit event started');
+                $.mobile.loader.prototype.options.text = "loading";
+                $.mobile.loader.prototype.options.textVisible = false;
+                $.mobile.loader.prototype.options.theme = "a";
+                $.mobile.loader.prototype.options.html = "";
+            }); 
+            
+            $(document).ready(function(){
+                $.mobile.loader.prototype.options.text = "loading";
+                $.mobile.loader.prototype.options.textVisible = false;
+                $.mobile.loader.prototype.options.theme = "a";
+                $.mobile.loader.prototype.options.html = "";
+                
+                $(document).on({
+                    ajaxStart: function() { 
+                        $.mobile.loading('show');
+                        console.log('getJSON starts...');
+                        },
+                    ajaxStop: function() {
+                        $.mobile.loading('hide');
+                        console.log('getJSON ends...');
+                        }    
+                });
+            });
+        </script>
     </head>
     <body>
         <!-- As of jQM 1.4, these have been deprecated
@@ -43,6 +80,13 @@
         data-role="button". use  class="ui-btn" instead
         -->
 
+        <!--
+        ======================
+        REUSABLE OBJECTS BELOW
+        ======================
+        -->          
+        <img id="imgAjaxLoader" class="ajaxLoader" src="img/ajax-loader.gif" />
+        <!-- Adjust the ajaxLoader style to set margin top/left to half of the image size. That, combined with 50% for top and left ensures that the image is centered in the page. z-index is set to 100 to ensure that the image is in the foreground, and display:none prevents the image from being displayed.-->
         
         <!--
         =================
@@ -132,69 +176,65 @@
                 <h3>Footer</h3>
             </div>    
         </div> 
-	<script type="text/javascript">
-		$(document).on('pageinit', '#address-search-criteria-page', function(){      
-                    //alert('pageinit on address-search-criteria-page');
+        <script type="text/javascript">
+    		$(document).on('pageinit', '#address-search-criteria-page', function(){      
+                        //alert('pageinit on address-search-criteria-page');
 
-			$(document).on('click', '#usemylocation', function(){
+    			$(document).on('click', '#usemylocation', function(){
 
-				if (navigator.geolocation) {
-					function success(pos) {
-						// Location found
-						alert((new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude)));
-					}
-					function fail(error) {
-						alert("Cannot determine your location.");
-					}
-					// Find the users current position.  Cache the location for 5 minutes, timeout after 6 seconds
-					navigator.geolocation.getCurrentPosition(success, fail, {maximumAge: 500000, enableHighAccuracy:true, timeout: 6000});
-				}
-			});
+    				if (navigator.geolocation) {
+    					function success(pos) {
+    						// Location found
+    						alert((new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude)));
+    					}
+    					function fail(error) {
+    						alert("Cannot determine your location.");
+    					}
+    					// Find the users current position.  Cache the location for 5 minutes, timeout after 6 seconds
+    					navigator.geolocation.getCurrentPosition(success, fail, {maximumAge: 500000, enableHighAccuracy:true, timeout: 6000});
+    				}
+    			});
 
-			$(document).on('click', '#searchaddress', function(){ 
+    			$(document).on('click', '#searchaddress', function(){ 
 
-			    var url = 'http://api.themoviedb.org/3/',
-				mode = 'search/movie?query=',
-				movieName = '&query=the',
-				key = '&api_key=470fd2ec8853e25d2f8d86f685d2270e'; 
+    			    var url = 'http://winskee.com/phonegap/garagesalegenius/get-active-garage-sales.php'; 
 
-			    $.ajax({
-				url: url + mode + key + movieName ,
-				dataType: "jsonp",
-				async: true,
-				beforeSend: function() {
-				    // This callback function will trigger before data is sent
-				    $.mobile.loading('show', {theme:"a", text:"Please wait...", textonly:false, textVisible: false}); // show AJAX spinner
-				},
-				complete: function() {
-				    // This callback function will trigger on data sent/received complete
-				    $.mobile.loading('hide'); // hide AJAX spinner
-				},  
-				success: function (result) {
-				    //alert('ajax call successful');
-				    ajax.parseJSONP(result);
-				},
-				error: function (request,error) {
-				    alert('Network error has occurred please try again!');
-				}
-			    });          
-			});        
-		});
-		var movieInfo = {
-			id : null,
-			result : null
-		}
-		var ajax = {  
-			parseJSONP:function(result) {  
-				movieInfo.result = result.results;
+                    $.ajax({
+                        url: url,
+                        async: true,
+                        beforeSend: function() {
+                            // This callback function will trigger before data is sent
+                            $.mobile.loading('show', {theme:"a", text:"Getting addresses...", textonly:false, textVisible: true}); // show AJAX spinner
+                        },
+                        complete: function() {
+                            // This callback function will trigger on data sent/received complete
+                            $.mobile.loading('hide'); // hide AJAX spinner
+                        },  
+                        success: function (result) {
+                            //alert('ajax call successful. result='+ result);
+                            ajax.parseJSONP(result);
+                        },
+                        error: function (request,error) {
+                            alert("Can't seem to reach our servers.  Is your internet connection OK?  Please try again!");
+                        }
+                    });         
+    			});        
+    		});
+    		var sellersVO = {
+    			id : null,
+    			sellers : null
+    		}
+    		var ajax = {  
+    			parseJSONP:function(result) {  
+    				sellersVO.sellers = result;
 
-				// show the results page
-				$(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-page', {
-				reload: false
-				});
+    				// show the results page
+    				$(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-page', {
+    				    reload: false
+    				});
 
-			}
-		}
+    			}
+    		}
         </script>
         <!-- END PAGE: Address search criteria -->
 
@@ -224,16 +264,16 @@
                 //alert('pageinit on address-search-results-page');
                 // populate search results
                 $('#address-list').empty();        
-                $.each(movieInfo.result, function(i, row) {
+                $.each(sellersVO.sellers, function(i, row) {
                     console.log(JSON.stringify(row));
-                    $('#address-list').append('<li><a href="" data-id="' + row.id + '"><img src="http://d3gtl9l2a4fn1j.cloudfront.net/t/p/w185'+row.poster_path+'"/><h3>' + row.title + '</h3><p>' + row.vote_average + '/10</p></a></li>');
+                    $('#address-list').append('<li><a href="" data-id="' + row.id + '"><h3>' + row.formatted_address + '</h3><p>' + row.start_time + '</p></a></li>');
                 });
                 $('#address-list').listview('refresh');
                 $(".listview-wrapper").iscrollview("refresh");
 
                 // click on a search item result
                 $(document).on('vclick', '#address-list li a', function(){  
-                    movieInfo.id = $(this).attr('data-id');
+                    sellersVO.id = $(this).attr('data-id');
                     $(':mobile-pagecontainer').pagecontainer('change', '#view-seller-item-details-page', {
                         reload: false
                     });
@@ -361,6 +401,9 @@
                                 <label for="collectorsitems">Collector's Items</label>
                                 <input type="checkbox" name="collectorsitems" id="collectorsitems" value="N">	
                                 <input type="hidden" name="source" id="source" value="MOBILEAPP" />
+                                <input type="hidden" name="sellerlatitude" id="sellerlatitude" />
+                                <input type="hidden" name="sellerlongitude" id="sellerlongitude" />
+                                <input type="hidden" name="formattedaddress" id="formattedaddress" />
                             </fieldset>
                         </div>
                         <div class="ui-field-contain">
@@ -408,8 +451,18 @@
                     // submit the seller form only when the address is valid
                     geocoder.geocode({'address': addressToGeoCode}, function(results, status) {
                         if (status == google.maps.GeocoderStatus.OK) {
-                            //alert('address lat lng: ' + results[0].geometry.location);
 
+                            /*
+                            mysql data type
+                            Latitudes range from -90 to +90 (degrees), so DECIMAL(10, 8) is ok for that, but longitudes range from -180 to +180 (degrees) so you need DECIMAL(11, 8). The first number is the total number of digits stored, and the second is the number after the decimal point.
+
+                            In short: lat DECIMAL(10, 8) NOT NULL, lng DECIMAL(11, 8) NOT NULL
+                            */
+
+                            $('#sellerlatitude').val(results[0].geometry.location.lat());
+                            $('#sellerlongitude').val(results[0].geometry.location.lng());
+                            $('#formattedaddress').val(results[0].formatted_address);
+                            console.log('formatted address: ' + results[0].formatted_address);
 
                             // submit the seller form
                             $.ajax({
