@@ -340,26 +340,27 @@
                         </div>
                         <div class="ui-field-contain">
                             <fieldset data-role="controlgroup">
-                                <legend>Details</legend>
+                                <legend>Select all that apply to your Garage Sale:</legend>
 
                                 <label for="multifamily">Multi-Family</label>
-                                <input type="checkbox" name="favcolor" id="multifamily" value="multifamily">
+                                <input type="checkbox" name="multifamily" id="multifamily" value="N">
                                 <label for="parkonstreet">Park on Street</label>
-                                <input type="checkbox" name="favcolor" id="parkonstreet" value="parkonstreet">
+                                <input type="checkbox" name="parkonstreet" id="parkonstreet" value="N">
                                 <label for="parkatvisitorsparking">Park at Visitors Parking</label>
-                                <input type="checkbox" name="favcolor" id="parkatvisitorsparking" value="parkatvisitorsparking">	
+                                <input type="checkbox" name="parkatvisitorsparking" id="parkatvisitorsparking" value="N">	
                                 <label for="earlybirdsspecial">Early Birds Specials available</label>
-                                <input type="checkbox" name="favcolor" id="earlybirdsspecial" value="earlybirdsspecial">	
+                                <input type="checkbox" name="earlybirdsspecial" id="earlybirdsspecial" value="N">	
                                 <label for="canceledwhenraining">Cancelled when raining</label>
-                                <input type="checkbox" name="favcolor" id="canceledwhenraining" value="canceledwhenraining">	
+                                <input type="checkbox" name="canceledwhenraining" id="canceledwhenraining" value="N">	
                                 <label for="cashonly">Cash only</label>
-                                <input type="checkbox" name="favcolor" id="cashonly" value="cashonly">	
+                                <input type="checkbox" name="cashonly" id="cashonly" value="cashonly">	
                                 <label for="refreshementsprovided">Simple refreshments provided</label>
-                                <input type="checkbox" name="favcolor" id="refreshementsprovided" value="refreshementsprovided">	
+                                <input type="checkbox" name="refreshementsprovided" id="refreshementsprovided" value="N">	
                                 <label for="surprisefreebies">Surprise Freebies available</label>
-                                <input type="checkbox" name="favcolor" id="surprisefreebies" value="surprisefreebies">	
+                                <input type="checkbox" name="surprisefreebies" id="surprisefreebies" value="N">	
                                 <label for="collectorsitems">Collector's Items</label>
-                                <input type="checkbox" name="collectorsitems" id="collectorsitems" value="surprisefreebies">	
+                                <input type="checkbox" name="collectorsitems" id="collectorsitems" value="N">	
+                                <input type="hidden" name="source" id="source" value="MOBILEAPP" />
                             </fieldset>
                         </div>
                         <div class="ui-field-contain">
@@ -402,31 +403,35 @@
                     // geocode the seller's address
                     var geocoder = new google.maps.Geocoder();
                     var addressToGeoCode = $("#address").val();
+                    
+                    // geocoding is async
+                    // submit the seller form only when the address is valid
                     geocoder.geocode({'address': addressToGeoCode}, function(results, status) {
                         if (status == google.maps.GeocoderStatus.OK) {
                             //alert('address lat lng: ' + results[0].geometry.location);
-/*                            $(':mobile-pagecontainer').pagecontainer('change', '#thank-you-for-posting-page', {
-                                reload: false
-                            });*/
-                            sellerFormOK = true;
+
+
+                            // submit the seller form
+                            $.ajax({
+                                url: 'http://winskee.com/phonegap/garagesalegenius/add-garage-sale.php', 
+                                type: 'POST', 
+                                dataType: 'json', // request type html/json/xml
+                                data: $('#seller-form1').serialize(), 
+                                beforeSend: function() {
+                                },
+                                success: function(data) {
+                                    // show the success page
+                                    $(':mobile-pagecontainer').pagecontainer('change', '#thank-you-for-posting-page', {
+                                        reload: false
+                                    });
+                                },
+                                error: function(e) {
+                                    console.log(e)
+                                }
+                            });
+
                         } else {
                             alert('Geocode was not successful for the following reason: ' + status);
-                        }
-                    });
-
-                    // submit the seller form
-                    $.ajax({
-                        url: 'http://winskee.com/phonegap/garagesalegenius/add-garage-sale.php', 
-                        type: 'POST', 
-                        dataType: 'json', // request type html/json/xml
-                        data: $('#seller-form1').serialize(), 
-                        beforeSend: function() {
-                        },
-                        success: function(data) {
-                            alert(data);
-                        },
-                        error: function(e) {
-                            console.log(e)
                         }
                     });
                     
