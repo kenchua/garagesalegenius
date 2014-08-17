@@ -40,34 +40,38 @@
         <script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
         <script type="text/javascript" src="js/jquery.validate.min.js"></script> 
         <script type="text/javascript" src="js/iscroll.js"></script> 
-        <script type="text/javascript" src="js/jquery.mobile.iscrollview.js"></script> 
+        <script type="text/javascript" src="js/jquery.mobile.iscrollview.js"></script>
+        <script type="text/javascript" src="js/jquery.loadJSON.js"></script> 
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/gsgenius.js"></script>
 
         <script>
+            /*
             $(document).on( "mobileinit", function() {
                 console.log('mobileinit started.');
-                alert('mobileinit event started');
                 $.mobile.loader.prototype.options.text = "loading";
                 $.mobile.loader.prototype.options.textVisible = false;
                 $.mobile.loader.prototype.options.theme = "a";
                 $.mobile.loader.prototype.options.html = "";
-            }); 
+            });
+            */
             
             $(document).ready(function(){
+                /*
                 $.mobile.loader.prototype.options.text = "loading";
                 $.mobile.loader.prototype.options.textVisible = false;
                 $.mobile.loader.prototype.options.theme = "a";
                 $.mobile.loader.prototype.options.html = "";
+                */
                 
                 $(document).on({
                     ajaxStart: function() { 
                         $.mobile.loading('show');
-                        console.log('getJSON starts...');
+                        console.log('Ajax call started.');
                         },
                     ajaxStop: function() {
                         $.mobile.loading('hide');
-                        console.log('getJSON ends...');
+                        console.log('Ajax call ended');
                         }    
                 });
             });
@@ -222,11 +226,13 @@
     		});
     		var sellersVO = {
     			id : null,
-    			sellers : null
+    			sellers : null,
+                sellerDetail: null
     		}
     		var ajax = {  
     			parseJSONP:function(result) {  
     				sellersVO.sellers = result;
+                    console.log('Addresses found: ' + sellersVO.sellers);
 
     				// show the results page
     				$(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-page', {
@@ -268,7 +274,7 @@
 
                     // append the gui_selected attribute that we will use to store the user's selection of this address
                     row.gui_selected = false;
-                    console.log(JSON.stringify(row));
+                    console.log('Seller: ' + JSON.stringify(row));
 
                     // assemble the custom address row
                     var addressStaticGMapUrl = 'http://maps.googleapis.com/maps/api/staticmap?center=' + row.latitude + ',' + row.longitude + '&zoom=17&size=100x100&maptype=roadmap&markers=' + row.latitude + ',' + row.longitude;
@@ -280,10 +286,12 @@
 
                 // click on a search item result
                 $(document).on('vclick', '#address-list li a', function(){  
-                    var sellerId = $(this).attr('data-id');
+                    sellersVO.id = $(this).attr('data-id');
 
                     $.each(sellersVO.sellers, function(i, row) {
-                        if (row.id == sellerId) {
+                        // toggle select/deselect address
+                        if (row.id == sellersVO.id) {
+                            sellersVO.sellerDetail = row;   // keep a reference to the selected address
                             if (row.gui_selected) {
                                 row.gui_selected = false;
                                 console.log("Deselected " + row.formatted_address);
@@ -297,11 +305,9 @@
                     });
 
                     //$(this).attr('data-theme','a').trigger('refresh');
-                    /*
-                    sellersVO.id = $(this).attr('data-id');
                     $(':mobile-pagecontainer').pagecontainer('change', '#view-seller-item-details-page', {
                         reload: false
-                    });*/
+                    });
                 });
             });
         </script>
@@ -346,7 +352,7 @@
                         position: google.maps.ControlPosition.RIGHT_CENTER
                     },
                     scaleControl: false,
-                    streetViewControl: false,
+                    streetViewControl: true,
                     streetViewControlOptions: {
                         position: google.maps.ControlPosition.RIGHT_CENTER
                     }
@@ -363,39 +369,6 @@
 
                 });
                 map.fitBounds(bounds);
-
-                /* // Bounds for North America
-                var strictBounds = new google.maps.LatLngBounds(
-                 new google.maps.LatLng(28.70, -127.50), 
-                 new google.maps.LatLng(48.85, -55.90)
-                );
-
-                // Listen for the dragend event
-                google.maps.event.addListener(map, 'dragend', function() {
-                 if (strictBounds.contains(map.getCenter())) return;
-
-                 // We're out of bounds - Move the map back within the bounds
-
-                 var c = map.getCenter(),
-                 x = c.lng(),
-                 y = c.lat(),
-                 maxX = strictBounds.getNorthEast().lng(),
-                 maxY = strictBounds.getNorthEast().lat(),
-                 minX = strictBounds.getSouthWest().lng(),
-                 minY = strictBounds.getSouthWest().lat();
-
-                 if (x < minX) x = minX;
-                 if (x > maxX) x = maxX;
-                 if (y < minY) y = minY;
-                 if (y > maxY) y = maxY;
-
-                 map.setCenter(new google.maps.LatLng(y, x));
-                });
-
-                // Limit the zoom level
-                google.maps.event.addListener(map, 'zoom_changed', function() {
-                 if (map.getZoom() < minZoomLevel) map.setZoom(minZoomLevel);
-                });  */
 
             });
         </script>
@@ -568,51 +541,47 @@
         
         <!-- BEGIN PAGE: View Seller item details -->
         <div data-role="page" id="view-seller-item-details-page">
-            <form id="seller-form1">
+            <form id="ro-seller-form1">
                 <div data-role="header" data-position="fixed">
                     <h3>View</h3>
                 </div>   
 
                 <div role="main" class="ui-content">
-                        <div data-role="fieldcontain">
-                            <label for="selleremail">Email:</label>
-                            <input type="email" name="selleremail" id="selleremail" placeholder="Enter your email"/>
+                        <div class="ui-field-contain">
+                            <label for="formatted_address">Address</label>
+                            <input type="text" id="formatted_address" name="formatted_address"/>
                         </div>
                         <div class="ui-field-contain">
-                            <label for="address">Address</label>
-                            <input type="text" id="address" name="address" placeholder="Enter your address"/>
-                        </div>
-                        <div class="ui-field-contain">
-                            <label for="starttime">Start Time</label>
-                            <input type="text" id="starttime" name="starttime" placeholder="Enter Start Time"/>
+                            <label for="start_time">Start Time</label>
+                            <input type="text" id="start_time" name="start_time"/>
                         </div>
                         <div class="ui-field-contain">
                             <fieldset data-role="controlgroup">
                                 <legend>Details</legend>
 
-                                <label for="multifamily">Multi-Family</label>
-                                <input type="checkbox" name="favcolor" id="multifamily" value="multifamily">
-                                <label for="parkonstreet">Park on Street</label>
-                                <input type="checkbox" name="favcolor" id="parkonstreet" value="parkonstreet">
-                                <label for="parkatvisitorsparking">Park at Visitors Parking</label>
-                                <input type="checkbox" name="favcolor" id="parkatvisitorsparking" value="parkatvisitorsparking">	
-                                <label for="earlybirdsspecial">Early Birds Specials available</label>
-                                <input type="checkbox" name="favcolor" id="earlybirdsspecial" value="earlybirdsspecial">	
-                                <label for="canceledwhenraining">Cancelled when raining</label>
-                                <input type="checkbox" name="favcolor" id="canceledwhenraining" value="canceledwhenraining">	
-                                <label for="cashonly">Cash only</label>
-                                <input type="checkbox" name="favcolor" id="cashonly" value="cashonly">	
-                                <label for="refreshementsprovided">Simple refreshments provided</label>
-                                <input type="checkbox" name="favcolor" id="refreshementsprovided" value="refreshementsprovided">	
-                                <label for="surprisefreebies">Surprise Freebies available</label>
-                                <input type="checkbox" name="favcolor" id="surprisefreebies" value="surprisefreebies">	
-                                <label for="collectorsitems">Collector's Items</label>
-                                <input type="checkbox" name="collectorsitems" id="collectorsitems" value="surprisefreebies">	
+                                <label for="multi_family">Multi-Family</label>
+                                <input type="checkbox" name="multi_family" id="multi_family">
+                                <label for="street_parking">Park on Street</label>
+                                <input type="checkbox" name="street_parking" id="street_parking">
+                                <label for="visitors_parking">Park at Visitors Parking</label>
+                                <input type="checkbox" name="visitors_parking" id="visitors_parking">   
+                                <label for="early_bird">Early Birds Specials available</label>
+                                <input type="checkbox" name="early_bird" id="early_bird">   
+                                <label for="rain_cancelled">Cancelled when raining</label>
+                                <input type="checkbox" name="rain_cancelled" id="rain_cancelled">   
+                                <label for="cash_only">Cash only</label>
+                                <input type="checkbox" name="cash_only" id="cash_only" value="cashonly">  
+                                <label for="refreshments">Simple refreshments provided</label>
+                                <input type="checkbox" name="refreshments" id="refreshments">   
+                                <label for="freebies">Surprise Freebies available</label>
+                                <input type="checkbox" name="freebies" id="freebies"> 
+                                <label for="collectors_items">Collector's Items</label>
+                                <input type="checkbox" name="collectors_items" id="collectors_items">
                             </fieldset>
                         </div>
                         <div class="ui-field-contain">
-                            <label for="messagetobuyers">Additional message to buyers:</label>
-                            <textarea id="messagetobuyers" name="messagetobuyers" placeholder="eg: Specify your specialty items"></textarea>
+                            <label for="message">Additional message to buyers:</label>
+                            <textarea id="message" name="message" placeholder="eg: Specify your specialty items"></textarea>
                         </div>
                 </div>
 
@@ -624,6 +593,11 @@
         </div> 
 
         <script>
+            $(document).on('pageshow', '#view-seller-item-details-page',function(e,data) {
+                // set and display the seller's detail info
+                console.log('Populating seller form from JSON: ' + JSON.stringify(sellersVO.sellerDetail));
+                $('form').loadJSON(sellersVO.sellerDetail); // the name of the read-only form is ro-seller-form1, but it seems 'form' must be passed in.
+            });
         </script>
         <!-- END PAGE: View Seller item details -->
         
