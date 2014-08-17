@@ -265,18 +265,43 @@
                 // populate search results
                 $('#address-list').empty();        
                 $.each(sellersVO.sellers, function(i, row) {
+
+                    // append the gui_selected attribute that we will use to store the user's selection of this address
+                    row.gui_selected = false;
                     console.log(JSON.stringify(row));
-                    $('#address-list').append('<li><a href="" data-id="' + row.id + '"><h3>' + row.formatted_address + '</h3><p>' + row.start_time + '</p></a></li>');
+
+                    // assemble the custom address row
+                    var addressStaticGMapUrl = 'http://maps.googleapis.com/maps/api/staticmap?center=' + row.latitude + ',' + row.longitude + '&zoom=17&size=100x100&maptype=roadmap&markers=' + row.latitude + ',' + row.longitude;
+
+                    $('#address-list').append('<li><a href="" data-id="' + row.id + '">' + '<img src="' + addressStaticGMapUrl + '"/>'  + '<h3>' + row.formatted_address + '</h3><p>When:&nbsp;' + row.start_time + '&nbsp;-&nbsp;' + row.end_time + '</p></a></li>');
                 });
                 $('#address-list').listview('refresh');
                 $(".listview-wrapper").iscrollview("refresh");
 
                 // click on a search item result
                 $(document).on('vclick', '#address-list li a', function(){  
+                    var sellerId = $(this).attr('data-id');
+
+                    $.each(sellersVO.sellers, function(i, row) {
+                        if (row.id == sellerId) {
+                            if (row.gui_selected) {
+                                row.gui_selected = false;
+                                console.log("Deselected " + row.formatted_address);
+                            } else {
+                                row.gui_selected = true;
+                                console.log("Selected " + row.formatted_address);
+                            }
+                            return false;   // exit loop                            
+                        }
+
+                    });
+
+                    //$(this).attr('data-theme','a').trigger('refresh');
+                    /*
                     sellersVO.id = $(this).attr('data-id');
                     $(':mobile-pagecontainer').pagecontainer('change', '#view-seller-item-details-page', {
                         reload: false
-                    });
+                    });*/
                 });
             });
         </script>
@@ -309,8 +334,35 @@
                 var map = new google.maps.Map(document.getElementById('search-results-map-canvas'), {
                     zoom: minZoomLevel,
                     center: new google.maps.LatLng(38.50, -90.50),
-                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    panControl: true,
+                    mapTypeControl: false,
+                    panControlOptions: {
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    zoomControl: true,
+                    zoomControlOptions: {
+                        style: google.maps.ZoomControlStyle.LARGE,
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    scaleControl: false,
+                    streetViewControl: false,
+                    streetViewControlOptions: {
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    }
                 });
+
+                var bounds = new google.maps.LatLngBounds();
+                $.each(sellersVO.sellers, function(i, row) {
+                    var latlng = new google.maps.LatLng(row.latitude, row.longitude);
+                    new google.maps.Marker({
+                        position: latlng,
+                        map: map
+                    });
+                    bounds.extend(latlng);
+
+                });
+                map.fitBounds(bounds);
 
                 /* // Bounds for North America
                 var strictBounds = new google.maps.LatLngBounds(
