@@ -563,13 +563,19 @@
                     <div id="ro_collectors_items" style="display:none;">Collector's Items&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
                     
                     <!-- buyer to seller map and directions -->
-                    <div id="b2s-map-div" style="width:100%;">
-                        <h3>Map and Directions to Seller's location</h3>
-                        <div id="b2s-map-canvas" style="width:48%; height:100%; float:left; border: 1px solid silver;"></div>
+                    <div style="width:100%;">
+                        <!--<h3 id="map-and-directions-header">Map and Driving directions to Seller's location</h3>-->
+                        <h3 id="map-and-directions-header" style="float:left;margin-right:10px;">Seller's location</h3>
+                        <input type="button" data-icon="location" data-inline="true" value="Get Driving Directions" id="get-driving-directions" style="float:right;"/>
+                    </div>
+
+                    <div id="b2s-map-div" style="width:100%;clear:left;">
+                        <div id="b2s-map-canvas" style="width:48%; height:100%;; border: 1px solid silver; float:left;"></div>
 
                         <!-- google map directions from buyer to seller's location -->
                         <div id="b2s-directions-panel" style="width:48%; height:100%; float:right;"></div>
                     </div>
+                    
                 </div>
 
                 <div data-role="footer" data-position="fixed" data-tap-toggle="false">
@@ -592,7 +598,7 @@
                 $('#ro_address').html(sellersVO.sellerDetail.formatted_address);
                 $('#ro_start_time').html(sellersVO.sellerDetail.start_time);
                 $('#ro_message').html('Message from seller: ' + sellersVO.sellerDetail.message);
-                if (sellersVO.sellerDetail.street_parking) {$('#ro_street_parking').show();}
+                (sellersVO.sellerDetail.street_parking)? $('#ro_street_parking').show() : $('#ro_street_parking').hide();
                 if (sellersVO.sellerDetail.visitors_parking) {$('#ro_visitors_parking').show();}
                 if (sellersVO.sellerDetail.early_bird) {$('#ro_early_bird').show();}
                 if (sellersVO.sellerDetail.cash_only) {$('#ro_cash_only').show();}
@@ -612,12 +618,12 @@
                     zoom: 8,
                     center: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
-                    panControl: true,
+                    panControl: false,
                     mapTypeControl: false,
                     panControlOptions: {
                         position: google.maps.ControlPosition.RIGHT_CENTER
                     },
-                    zoomControl: true,
+                    zoomControl: false,
                     zoomControlOptions: {
                         style: google.maps.ZoomControlStyle.LARGE,
                         position: google.maps.ControlPosition.RIGHT_CENTER
@@ -658,6 +664,7 @@
                         b2sDirectionsDisplay.setDirections(response);
                     } else {
                         console.log('Failed to get the directions. status = ' + status);
+                        $('#b2s-directions-panel').html('No route found');
                     }
                 });
 
