@@ -547,50 +547,29 @@
                 </div>   
 
                 <div role="main" class="ui-content">
-                        <div class="ui-field-contain">
-                            <label for="formatted_address">Address</label>
-                            <input type="text" id="formatted_address" name="formatted_address"/>
-                        </div>
-                        <div class="ui-field-contain">
-                            <label for="start_time">Start Time</label>
-                            <input type="text" id="start_time" name="start_time"/>
-                        </div>
-                        <div class="ui-field-contain">
-                            <fieldset data-role="controlgroup">
-                                <legend>Details</legend>
+                    <h3 id="ro_address"></h3>
+                    <h4 id="ro_start_time"></h4>
+                    <div id="ro_message">Message from seller: </div>
+                    <p></p>
 
-                                <label for="multi_family">Multi-Family</label>
-                                <input type="checkbox" name="multi_family" id="multi_family">
-                                <label for="street_parking">Park on Street</label>
-                                <input type="checkbox" name="street_parking" id="street_parking">
-                                <label for="visitors_parking">Park at Visitors Parking</label>
-                                <input type="checkbox" name="visitors_parking" id="visitors_parking">   
-                                <label for="early_bird">Early Birds Specials available</label>
-                                <input type="checkbox" name="early_bird" id="early_bird">   
-                                <label for="rain_cancelled">Cancelled when raining</label>
-                                <input type="checkbox" name="rain_cancelled" id="rain_cancelled">   
-                                <label for="cash_only">Cash only</label>
-                                <input type="checkbox" name="cash_only" id="cash_only" value="cashonly">  
-                                <label for="refreshments">Simple refreshments provided</label>
-                                <input type="checkbox" name="refreshments" id="refreshments">   
-                                <label for="freebies">Surprise Freebies available</label>
-                                <input type="checkbox" name="freebies" id="freebies"> 
-                                <label for="collectors_items">Collector's Items</label>
-                                <input type="checkbox" name="collectors_items" id="collectors_items">
-                            </fieldset>
-                        </div>
-                        <div class="ui-field-contain">
-                            <label for="message">Additional message to buyers:</label>
-                            <textarea id="message" name="message" placeholder="eg: Specify your specialty items"></textarea>
-                        </div>
+                    <div id="ro_multi_family" style="display:none;">Multi-Family&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
+                    <div id="ro_street_parking" style="display:none;">Park on Street&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
+                    <div id="ro_visitors_parking" style="display:none;">Park at Visitors Parking&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
+                    <div id="ro_early_bird" style="display:none;">Early Birds Specials available&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
+                    <div id="ro_rain_cancelled" style="display:none;">Cancelled when raining&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div> 
+                    <div id="ro_cash_only" style="display:none;">Cash only&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
+                    <div id="ro_refreshments" style="display:none;">Simple refreshments provided&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
+                    <div id="ro_freebies" style="display:none;">Surprise Freebies available&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
+                    <div id="ro_collectors_items" style="display:none;">Collector's Items&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
+                    
+                    <!-- buyer to seller map and directions -->
+                    <div id="b2s-map-div" style="width:100%;">
+                        <h3>Map and Directions to Seller's location</h3>
+                        <div id="b2s-map-canvas" style="width:48%; height:100%; float:left; border: 1px solid silver;"></div>
 
-                        <!-- buyer to seller map -->
-                        <div id="b2s-map-div" style="width:100%;">
-                            <div id="b2s-map-canvas" style="width:48%; height:100%; float:left;"></div>
-
-                            <!-- google map directions from buyer to seller's location -->
-                            <div id="b2s-directions-panel" style="width:48%; height:100%; float:right;"></div>
-                        </div>
+                        <!-- google map directions from buyer to seller's location -->
+                        <div id="b2s-directions-panel" style="width:48%; height:100%; float:right;"></div>
+                    </div>
                 </div>
 
                 <div data-role="footer" data-position="fixed" data-tap-toggle="false">
@@ -603,9 +582,24 @@
         <script>
             $(document).on('pageshow', '#view-seller-item-details-page',function(e,data) {
                 // set and display the seller's detail info
+                
+                /* couldn't get it to work for checkboxes, even though JSON object contains boolean values
                 console.log('Populating seller form from JSON: ' + JSON.stringify(sellersVO.sellerDetail));
                 $('form').loadJSON(sellersVO.sellerDetail); // the name of the read-only form is ro-seller-form1, but it seems 'form' must be passed in.
-
+                */
+                
+                console.log('Populating seller form from JSON: ' + JSON.stringify(sellersVO.sellerDetail));
+                $('#ro_address').html(sellersVO.sellerDetail.formatted_address);
+                $('#ro_start_time').html(sellersVO.sellerDetail.start_time);
+                $('#ro_message').html('Message from seller: ' + sellersVO.sellerDetail.message);
+                if (sellersVO.sellerDetail.street_parking) {$('#ro_street_parking').show();}
+                if (sellersVO.sellerDetail.visitors_parking) {$('#ro_visitors_parking').show();}
+                if (sellersVO.sellerDetail.early_bird) {$('#ro_early_bird').show();}
+                if (sellersVO.sellerDetail.cash_only) {$('#ro_cash_only').show();}
+                if (sellersVO.sellerDetail.refreshments) {$('#ro_refreshments').show();}
+                if (sellersVO.sellerDetail.freebies) {$('#ro_freebies').show();}
+                if (sellersVO.sellerDetail.collectors_items) {$('#ro_collectors_items').show();}
+        
                 console.log('Rendering buyer to seller map');
                 $('#b2s-map-div').height(getRealContentHeight() / 2);   // TODO: need to know what height to set the div to, and not just guessing
                 
@@ -613,9 +607,9 @@
                 var b2sDirectionsDisplay = new google.maps.DirectionsRenderer();
                 var b2sDirectionsService = new google.maps.DirectionsService();
 
-                // create the map
+                // create the buyer to seller map
                 var b2sMap = new google.maps.Map(document.getElementById('b2s-map-canvas'), {
-                    zoom: 12,
+                    zoom: 8,
                     center: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     panControl: true,
@@ -635,17 +629,16 @@
                     }
                 });
 
-                b2sDirectionsDisplay.setMap(b2sMap);
-                b2sDirectionsDisplay.setPanel(document.getElementById('b2s-directions-panel'));
-
-/*                var bounds = new google.maps.LatLngBounds();
+                /*               
+                var bounds = new google.maps.LatLngBounds();
                 var latlng = new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude);
                 new google.maps.Marker({
                     position: latlng,
                     map: b2sMap
                 });
                 bounds.extend(latlng);
-                b2sMap.fitBounds(bounds);*/
+                b2sMap.fitBounds(bounds);
+                */
 
                 // get the directions from buyer to seller
                 var request = {
@@ -654,10 +647,14 @@
                     travelMode: google.maps.TravelMode.DRIVING
                 };
 
-                console.log('Calling b2sDirectionsService.route...');
+                // show map and directions from buyer to seller
+                console.log('Calling DirectionsService.route...');
                 b2sDirectionsService.route(request, function(response, status) {
                     if (status == google.maps.DirectionsStatus.OK) {
                         console.log('Got the directions.');
+                        b2sDirectionsDisplay.setMap(b2sMap);
+                        $('#b2s-directions-panel').html('');    // clear previous directions
+                        b2sDirectionsDisplay.setPanel(document.getElementById('b2s-directions-panel'));
                         b2sDirectionsDisplay.setDirections(response);
                     } else {
                         console.log('Failed to get the directions. status = ' + status);
