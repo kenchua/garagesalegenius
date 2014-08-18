@@ -583,6 +583,14 @@
                             <label for="message">Additional message to buyers:</label>
                             <textarea id="message" name="message" placeholder="eg: Specify your specialty items"></textarea>
                         </div>
+
+                        <!-- buyer to seller map -->
+                        <div id="b2s-map-div" style="width:100%;">
+                            <div id="b2s-map-canvas" style="width:48%; height:100%; float:left;"></div>
+
+                            <!-- google map directions from buyer to seller's location -->
+                            <div id="b2s-directions-panel" style="width:48%; height:100%; float:right;"></div>
+                        </div>
                 </div>
 
                 <div data-role="footer" data-position="fixed" data-tap-toggle="false">
@@ -597,6 +605,66 @@
                 // set and display the seller's detail info
                 console.log('Populating seller form from JSON: ' + JSON.stringify(sellersVO.sellerDetail));
                 $('form').loadJSON(sellersVO.sellerDetail); // the name of the read-only form is ro-seller-form1, but it seems 'form' must be passed in.
+
+                console.log('Rendering buyer to seller map');
+                $('#b2s-map-div').height(getRealContentHeight() / 2);   // TODO: need to know what height to set the div to, and not just guessing
+                
+                // legend: b2s = buyer to seller
+                var b2sDirectionsDisplay = new google.maps.DirectionsRenderer();
+                var b2sDirectionsService = new google.maps.DirectionsService();
+
+                // create the map
+                var b2sMap = new google.maps.Map(document.getElementById('b2s-map-canvas'), {
+                    zoom: 12,
+                    center: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    panControl: true,
+                    mapTypeControl: false,
+                    panControlOptions: {
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    zoomControl: true,
+                    zoomControlOptions: {
+                        style: google.maps.ZoomControlStyle.LARGE,
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    scaleControl: false,
+                    streetViewControl: false,
+                    streetViewControlOptions: {
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    }
+                });
+
+                b2sDirectionsDisplay.setMap(b2sMap);
+                b2sDirectionsDisplay.setPanel(document.getElementById('b2s-directions-panel'));
+
+/*                var bounds = new google.maps.LatLngBounds();
+                var latlng = new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude);
+                new google.maps.Marker({
+                    position: latlng,
+                    map: b2sMap
+                });
+                bounds.extend(latlng);
+                b2sMap.fitBounds(bounds);*/
+
+                // get the directions from buyer to seller
+                var request = {
+                    origin: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
+                    destination: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
+                    travelMode: google.maps.TravelMode.DRIVING
+                };
+
+                console.log('Calling b2sDirectionsService.route...');
+                b2sDirectionsService.route(request, function(response, status) {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        console.log('Got the directions.');
+                        b2sDirectionsDisplay.setDirections(response);
+                    } else {
+                        console.log('Failed to get the directions. status = ' + status);
+                    }
+                });
+
+
             });
         </script>
         <!-- END PAGE: View Seller item details -->
