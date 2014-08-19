@@ -566,19 +566,18 @@
         <div data-role="page" id="view-seller-item-details-page">
             <form id="ro-seller-form1">
                 <div data-role="header" data-position="fixed">
-                    <h3>View</h3>
+                    <h3>Seller's Info</h3>
                 </div>   
                 
+                <!-- prompt for buyer address popup -->
                 <div data-role="popup" id="buyer-address-popup" data-theme="a" class="ui-corner-all" data-dismissible="false">
                     <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
-                    <form>
                     <div style="padding:10px 20px;">
                         <h3>Enter your address or location</h3>
                         <label for="buyer_address" class="ui-hidden-accessible">Address:</label>
                         <input type="text" name="buyer_address" id="buyer_address" value="" placeholder="" data-theme="a">
-                        <button type="submit" class="ui-btn ui-corner-all ui-shadow ui-btn-b ui-btn-icon-left ui-icon-check">Go!</button>
+                        <button class="ui-btn ui-corner-all ui-shadow ui-btn-b ui-btn-icon-left ui-icon-check" onclick="geoCodeBuyerAddress();">Go!</button>
                     </div>
-                    </form>
                 </div>
 
                 <div role="main" class="ui-content">
@@ -603,9 +602,7 @@
                         <!--
                         <input type="button" data-icon="location" data-inline="true" value="Get Driving Directions" id="get-driving-directions" style="float:right;"/>
 -->
-                        
                         <a id="get-driving-directions" href="#buyer-address-popup" data-rel="popup" data-position-to="window" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a" data-transition="pop">Get Driving Directions</a>
-                        
                         
                     </div>
 
@@ -626,6 +623,12 @@
         </div> 
 
         <script>
+            // legend: b2s = buyer to seller
+            var b2sDirectionsDisplay = new google.maps.DirectionsRenderer();
+            var b2sDirectionsService = new google.maps.DirectionsService();
+            var b2sMap;
+            var b2sDrivingDirectionsRequest;
+            
             $(document).on('pageshow', '#view-seller-item-details-page',function(e,data) {
                 // set and display the seller's detail info
                 
@@ -650,13 +653,21 @@
         
                 console.log('Rendering buyer to seller map');
                 $('#b2s-map-div').height(getRealContentHeight() / 2);   // TODO: need to know what height to set the div to, and not just guessing
-                
-                // legend: b2s = buyer to seller
-                var b2sDirectionsDisplay = new google.maps.DirectionsRenderer();
-                var b2sDirectionsService = new google.maps.DirectionsService();
 
+                // initially, source and destination latlngs are the same
+                b2sDrivingDirectionsRequest = {
+                    origin: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
+                    destination: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
+                    travelMode: google.maps.TravelMode.DRIVING
+                };
+                initBuyer2SellerMapAndDrivingDirections();
+
+            });
+            
+            var initBuyer2SellerMapAndDrivingDirections = function() {
+                console.log('Initializing buyer to seller map and driving directions.');
                 // create the buyer to seller map
-                var b2sMap = new google.maps.Map(document.getElementById('b2s-map-canvas'), {
+                b2sMap = new google.maps.Map(document.getElementById('b2s-map-canvas'), {
                     zoom: 8,
                     center: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -677,27 +688,10 @@
                     }
                 });
 
-                /*               
-                var bounds = new google.maps.LatLngBounds();
-                var latlng = new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude);
-                new google.maps.Marker({
-                    position: latlng,
-                    map: b2sMap
-                });
-                bounds.extend(latlng);
-                b2sMap.fitBounds(bounds);
-                */
-
-                // get the directions from buyer to seller
-                var request = {
-                    origin: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
-                    destination: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
-                    travelMode: google.maps.TravelMode.DRIVING
-                };
-
+                // get driving directions from buyer to seller
                 // show map and directions from buyer to seller
                 console.log('Calling DirectionsService.route...');
-                b2sDirectionsService.route(request, function(response, status) {
+                b2sDirectionsService.route(b2sDrivingDirectionsRequest, function(response, status) {
                     if (status == google.maps.DirectionsStatus.OK) {
                         console.log('Got the directions.');
                         b2sDirectionsDisplay.setMap(b2sMap);
@@ -706,12 +700,39 @@
                         b2sDirectionsDisplay.setDirections(response);
                     } else {
                         console.log('Failed to get the directions. status = ' + status);
-                        $('#b2s-directions-panel').html('No route found');
+                        $('#b2s-directions-panel').html("Sorry, no driving route found!  Map displays the seller's address.");
+                        
+                        console.log("Displaying the seller's address on the map.");
+                        var bounds = new google.maps.LatLngBounds();
+                        //var latlng = new google.maps.LatLng(b2sDrivingDirectionsRequest.destination);
+                        var latlng = new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude);
+                        new google.maps.Marker({
+                            position: latlng,
+                            map: b2sMap
+                        });
+                        bounds.extend(latlng);
+                        b2sMap.fitBounds(bounds);
+                        
                     }
                 });
+            }   // end var initBuyer2SellerMapAndDrivingDirections
 
+            var geoCodeBuyerAddress = function() {
+                $("#buyer-address-popup").popup("close");
+                buyerAddressToGeoCode = $("#buyer_address").val();
+                
+                // actually, no need to geocode the buyer's address, as the driving directions request object can take either latlng or address string
+                //console.log('Geocoding buyer address: ' + buyerAddressToGeoCode);
 
-            });
+                b2sDrivingDirectionsRequest = {
+                    origin: buyerAddressToGeoCode,
+                    destination: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
+                    travelMode: google.maps.TravelMode.DRIVING
+                };
+
+                initBuyer2SellerMapAndDrivingDirections();
+            }
+
         </script>
         <!-- END PAGE: View Seller item details -->
         
