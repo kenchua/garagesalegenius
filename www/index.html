@@ -103,7 +103,7 @@
         <div data-role="page" id="select-buy-or-sell-page">
             <div data-role="header" data-position="fixed">
                 <h3>
-			Buy or Sell
+                    Buy or Sell
                 </h3>
             </div>   
 
@@ -139,42 +139,47 @@
         <!-- BEGIN PAGE: Address search criteria -->
         <div data-role="page" id="address-search-criteria-page">
             <div data-role="header" data-position="fixed">
-                <h3>
-			Buy or Sell
-                </h3>
+                <h3>Search for Sellers</h3>
             </div>   
 
-            <div role="main" class="ui-content get-my-location">
-                I am coming from:
-                <br/>
-                (choose one)
+            <div role="main" class="ui-content">
+                <h3>Search for Garage Sales</h3>
+                
+                <h4>1. I am coming from: (choose one)</h4>
                 <p></p>
-                <div class="ui-grid-solo">
+                <div class="ui-grid-solo" style="width:50%">
                     <div class="ui-block-a">
-                        <input type="text" id="postalcode" name="postalcode" placeholder="Enter your Postal Code"/>
+                        <input type="text" id="postalcode" name="postalcode" placeholder="Enter your Postal/Zip Code"/>
                     </div>
                     <div class="ui-block-a">
                         <input type="text" id="postalcode" name="postalcode" placeholder="Enter the nearest intersection you are at"/>
                     </div>
                     <div class="ui-block-a">
-                        <input type="button" data-icon="location" value="Use my location" id="usemylocation"/>
+                        <!--<input type="button" data-icon="location" value="Use my location" id="usemylocation"/>-->
+                        <a id="usemylocation" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">Use my location</a>
                     </div>
                 </div>
+                <br/><br/>
+
+                <h4>2. Within how many kilometers?</h4>
                 <p></p>
-                <p></p>
-                Show me the garage sales
-                <p></p>
-                <div class="ui-grid-solo">
+                <div class="ui-grid-solo" style="width:50%;">
                     <div class="ui-block-a">
-                        <input type="text" id="withinrange" name="withinrange" placeholder="Within how many kilometers"/>
-                    </div>
-                    <div class="ui-block-a">
-                        <p></p>
-                        <p></p>
-                        <input type="button" data-icon="search" value="Search" id="searchaddress"/>
+                        <input type="text" id="withinrange" name="withinrange" placeholder="Enter number of kilometers"/>
                     </div>
                 </div>
 
+                <h4>3. Search</h4>
+                <p></p>
+                <div class="ui-grid-solo" style="width:50%;">
+                    <div class="ui-block-a">
+                        <p></p>
+                        <p></p>
+                        <!--<input type="button" data-icon="search" value="Search" id="searchaddress"/>-->
+                        <a id="searchaddress" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">Search</a>
+                    </div>
+                </div>
+                
             </div>
 
             <div data-role="footer" data-position="fixed" data-tap-toggle="false">
@@ -572,11 +577,11 @@
                 <!-- prompt for buyer address popup -->
                 <div data-role="popup" id="buyer-address-popup" data-theme="a" class="ui-corner-all" data-dismissible="false">
                     <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-a ui-icon-delete ui-btn-icon-notext ui-btn-right">Close</a>
-                    <div style="padding:10px 20px;">
+                    <div style="padding:10px 20px;text-align: center;">
                         <h3>Enter your address or location</h3>
                         <label for="buyer_address" class="ui-hidden-accessible">Address:</label>
                         <input type="text" name="buyer_address" id="buyer_address" value="" placeholder="" data-theme="a">
-                        <button class="ui-btn ui-corner-all ui-shadow ui-btn-b ui-btn-icon-left ui-icon-check" onclick="geoCodeBuyerAddress();">Go!</button>
+                        <button class="ui-btn ui-corner-all ui-shadow ui-btn-b ui-btn-icon-left ui-icon-check ui-btn-inline" onclick="geoCodeBuyerAddress();">Go!</button>
                     </div>
                 </div>
 
@@ -698,6 +703,16 @@
                         $('#b2s-directions-panel').html('');    // clear previous directions
                         b2sDirectionsDisplay.setPanel(document.getElementById('b2s-directions-panel'));
                         b2sDirectionsDisplay.setDirections(response);
+                        
+                        // increase map height if needed
+                        var directionsDivHeight = $('#b2s-directions-panel').outerHeight(true);
+                        var mapCanvasHeight = $('#b2s-map-canvas').outerHeight(true);
+                        /*
+                        if (mapCanvasHeight < directionsDivHeight) {
+                            //$('#b2s-map-canvas').height(directionsDivHeight);
+                            $('#b2s-map-div').equalHeights();
+                        }
+                        */
                     } else {
                         console.log('Failed to get the directions. status = ' + status);
                         $('#b2s-directions-panel').html("Sorry, no driving route found!  Map displays the seller's address.");
