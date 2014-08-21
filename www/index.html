@@ -10,6 +10,13 @@
         <title>Garage Sale Genius</title>
 
         <link rel="stylesheet" type="text/css" href="css/gsgenius.css" />
+
+        <!-- from themeroller -->
+        <!--
+            <link rel="stylesheet" href="themes/sample.min.css" />
+            <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
+        -->
+
         <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.3.min.css" /> 
         <link rel="stylesheet" type="text/css" href="css/jquery.mobile.iscrollview.css" />
         <link rel="stylesheet" type="text/css" href="css/jquery.mobile.iscrollview-pull.css" />
@@ -136,33 +143,32 @@
             <div role="main" class="ui-content">
                 <h3>Search for Garage Sales</h3>
                 
-                <h4>1. I am coming from: (choose one)</h4>
+                <!--<h4>1. I am coming from: (choose one)</h4>-->
+                <h4>1. Enter your location (Postal code, Zip code or Address) or press Get my location</h4>
                 <p></p>
-                <div class="ui-grid-solo" style="width:50%">
+                <div class="ui-grid-solo">
                     <div class="ui-block-a">
-                        <input type="text" id="postalcode" name="postalcode" placeholder="Enter your Postal/Zip Code"/>
-                    </div>
-                    <div class="ui-block-a">
-                        <input type="text" id="postalcode" name="postalcode" placeholder="Enter the nearest intersection you are at"/>
+                        <input type="text" id="buyerlocation" placeholder="Postal code, Zip code or Address"/>
                     </div>
                     <div class="ui-block-a">
                         <!--<input type="button" data-icon="location" value="Use my location" id="usemylocation"/>-->
-                        <a id="usemylocation" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">Use my location</a>
+                        <a id="getmylocation" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">Get my location</a>
                     </div>
                 </div>
                 <br/><br/>
 
-                <h4>2. Within how many kilometers?</h4>
+                <h4>2. Within how many kilometers from you?</h4>
                 <p></p>
-                <div class="ui-grid-solo" style="width:50%;">
-                    <div class="ui-block-a">
-                        <input type="text" id="withinrange" name="withinrange" placeholder="Enter number of kilometers"/>
+                <div class="ui-grid-solo">
+                    <div class="ui-block-a" style="width:80%;">
+                        <input type="range" name="searchradius" id="searchradius" data-track-theme="a" data-theme="b" min="1" max="20" value="1">
                     </div>
                 </div>
-
+                <br/><br/>
+                
                 <h4>3. Search</h4>
                 <p></p>
-                <div class="ui-grid-solo" style="width:50%;">
+                <div class="ui-grid-solo">
                     <div class="ui-block-a">
                         <p></p>
                         <p></p>
@@ -607,16 +613,32 @@
                         <h3 id="map-and-directions-header" style="display:none; float:left;margin-right:10px;">Map and Driving directions to Seller's location</h3>
                         <!--
                         <input type="button" data-icon="location" data-inline="true" value="Get Driving Directions" id="get-driving-directions" style="float:right;"/>
--->
+                        -->
                         <a id="get-driving-directions" href="#buyer-address-popup" data-rel="popup" data-position-to="window" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a" data-transition="pop">Get Driving Directions</a>
-                        
                     </div>
 
+                    <!--
                     <div id="b2s-map-div" style="width:100%;clear:left;">
                         <div id="b2s-map-canvas" style="width:48%; height:100%;; border: 1px solid silver; float:left;"></div>
-
-                        <!-- google map directions from buyer to seller's location -->
                         <div id="b2s-directions-panel" style="width:48%; height:100%; float:right;"></div>
+                    </div>
+                    -->
+
+                    <!-- map and driving directions tabbed interface -->
+                    <div data-role="tabs" id="b2s-map-div" style="width:100%; clear:left; margin-top:10px;">
+                        <div data-role="navbar">
+                            <ul>
+                                <li><a id="map-tab" href="#fragment-map">Map</a></li>
+                                <li><a href="#fragment-directions">Driving Directions</a></li>
+                            </ul>
+                        </div>
+                        <div id="fragment-map" style="height:360px;">
+                            <div id="b2s-map-canvas" style="width:100%; height:100%;"></div>
+                        </div>
+                        <div id="fragment-directions">
+                            <!-- google map directions from buyer to seller's location -->
+                            <div id="b2s-directions-panel" style="width:100%; height:100%;"></div>
+                        </div>
                     </div>
                     
                 </div>
@@ -666,15 +688,16 @@
                     destination: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
                     travelMode: google.maps.TravelMode.DRIVING
                 };
-                initBuyer2SellerMapAndDrivingDirections();
+                
+                initBuyer2SellerMapAndDrivingDirections(false);
 
             });
             
-            var initBuyer2SellerMapAndDrivingDirections = function() {
+            var initBuyer2SellerMapAndDrivingDirections = function(includeDrivingDirections) {
                 console.log('Initializing buyer to seller map and driving directions.');
                 // create the buyer to seller map
                 b2sMap = new google.maps.Map(document.getElementById('b2s-map-canvas'), {
-                    zoom: 8,
+                    zoom: 15,
                     center: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     panControl: false,
@@ -694,43 +717,57 @@
                     }
                 });
 
-                // get driving directions from buyer to seller
-                // show map and directions from buyer to seller
-                console.log('Calling DirectionsService.route...');
-                b2sDirectionsService.route(b2sDrivingDirectionsRequest, function(response, status) {
-                    if (status == google.maps.DirectionsStatus.OK) {
-                        console.log('Got the directions.');
-                        b2sDirectionsDisplay.setMap(b2sMap);
-                        $('#b2s-directions-panel').html('');    // clear previous directions
-                        b2sDirectionsDisplay.setPanel(document.getElementById('b2s-directions-panel'));
-                        b2sDirectionsDisplay.setDirections(response);
-                        
-                        // increase map height if needed
-                        var directionsDivHeight = $('#b2s-directions-panel').outerHeight(true);
-                        var mapCanvasHeight = $('#b2s-map-canvas').outerHeight(true);
-                        /*
-                        if (mapCanvasHeight < directionsDivHeight) {
-                            //$('#b2s-map-canvas').height(directionsDivHeight);
-                            $('#b2s-map-div').equalHeights();
+                if (includeDrivingDirections) {
+                    // get driving directions from buyer to seller
+                    // show map and directions from buyer to seller
+                    console.log('Calling DirectionsService.route...');
+                    b2sDirectionsService.route(b2sDrivingDirectionsRequest, function(response, status) {
+                        if (status == google.maps.DirectionsStatus.OK) {
+                            console.log('Got the directions.');
+                            b2sDirectionsDisplay.setMap(b2sMap);
+                            $('#b2s-directions-panel').html('');    // clear previous directions
+                            b2sDirectionsDisplay.setPanel(document.getElementById('b2s-directions-panel'));
+                            b2sDirectionsDisplay.setDirections(response);
+
+                            // increase map height if needed
+                            var directionsDivHeight = $('#b2s-directions-panel').outerHeight(true);
+                            var mapCanvasHeight = $('#b2s-map-canvas').outerHeight(true);
+                            /*
+                            if (mapCanvasHeight < directionsDivHeight) {
+                                //$('#b2s-map-canvas').height(directionsDivHeight);
+                                $('#b2s-map-div').equalHeights();
+                            }
+                            */
+                        } else {
+                            console.log('Failed to get the directions. status = ' + status);
+                            $('#b2s-directions-panel').html("Sorry, no driving route found!  Map displays the seller's address.");
+
+                            console.log("Displaying the seller's address on the map.");
+                            var bounds = new google.maps.LatLngBounds();
+                            //var latlng = new google.maps.LatLng(b2sDrivingDirectionsRequest.destination);
+                            var latlng = new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude);
+                            new google.maps.Marker({
+                                position: latlng,
+                                map: b2sMap
+                            });
+                            bounds.extend(latlng);
+                            b2sMap.fitBounds(bounds);
+
                         }
-                        */
-                    } else {
-                        console.log('Failed to get the directions. status = ' + status);
-                        $('#b2s-directions-panel').html("Sorry, no driving route found!  Map displays the seller's address.");
-                        
-                        console.log("Displaying the seller's address on the map.");
-                        var bounds = new google.maps.LatLngBounds();
-                        //var latlng = new google.maps.LatLng(b2sDrivingDirectionsRequest.destination);
-                        var latlng = new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude);
-                        new google.maps.Marker({
-                            position: latlng,
-                            map: b2sMap
-                        });
-                        bounds.extend(latlng);
-                        b2sMap.fitBounds(bounds);
-                        
-                    }
-                });
+                    });
+                } else {
+                    // by default, show the seller's marker on the map
+                    console.log('Placing map marker for ' + sellersVO.sellerDetail.formatted_address);
+                    var latlng = new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude);
+                    new google.maps.Marker({
+                        position: latlng,
+                        map: b2sMap
+                    });
+                    $('#b2s-directions-panel').html("<br>Press Get Driving Directions to get driving directions to the seller's address.");
+                }   // end if (includeDrivingDirections) {
+                
+                $("#map-tab").trigger("click");
+
             }   // end var initBuyer2SellerMapAndDrivingDirections
 
             var geoCodeBuyerAddress = function() {
@@ -746,7 +783,7 @@
                     travelMode: google.maps.TravelMode.DRIVING
                 };
 
-                initBuyer2SellerMapAndDrivingDirections();
+                initBuyer2SellerMapAndDrivingDirections(true);
             }
 
         </script>
