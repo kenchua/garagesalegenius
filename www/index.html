@@ -25,15 +25,6 @@
             .listview-wrapper {
                 width: 100% !important;
             }
-            .ajaxLoader {
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                margin-top: -24px;
-                margin-left: -24px;
-                z-index: 1000;
-                display: none;
-            }
         </style>
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
         <script type="text/javascript" src="js/jquery-2.1.1.js"></script> 
@@ -57,20 +48,13 @@
             */
             
             $(document).ready(function(){
-                /*
-                $.mobile.loader.prototype.options.text = "loading";
-                $.mobile.loader.prototype.options.textVisible = false;
-                $.mobile.loader.prototype.options.theme = "a";
-                $.mobile.loader.prototype.options.html = "";
-                */
-                
                 $(document).on({
                     ajaxStart: function() { 
-                        $.mobile.loading('show');
+                        //$.mobile.loading('show'); // shows the default jQM loading spinner
                         console.log('Ajax call started.');
                         },
                     ajaxStop: function() {
-                        $.mobile.loading('hide');
+                        //$.mobile.loading('hide');
                         console.log('Ajax call ended');
                         }    
                 });
@@ -89,10 +73,9 @@
         REUSABLE OBJECTS BELOW
         ======================
         -->          
-        <img id="imgAjaxLoader" class="ajaxLoader" src="img/ajax-loader.gif" />
-        <!-- Adjust the ajaxLoader style to set margin top/left to half of the image size. That, combined with 50% for top and left ensures that the image is centered in the page. z-index is set to 100 to ensure that the image is in the foreground, and display:none prevents the image from being displayed.-->
+    
         
-        
+
         <!--
         =================
         INTRO PAGES BELOW
@@ -141,6 +124,14 @@
             <div data-role="header" data-position="fixed">
                 <h3>Search for Sellers</h3>
             </div>   
+
+             <!-- ajax loading busy indicator popup -->
+            <div data-role="popup" id="ajax-modal-popup-address-search" class="ui-corner-all" data-dismissible="false" style="text-align:center; width:200px; height:70px;">
+                <div class="box300 border" style="padding:10px;">
+                    <img src="img/ajax-loader.gif" style="text-align:left; vertical-align:middle;">
+                    Processing
+                </div>
+            </div> 
 
             <div role="main" class="ui-content">
                 <h3>Search for Garage Sales</h3>
@@ -213,15 +204,13 @@
                         url: url,
                         async: true,
                         beforeSend: function() {
-                            // This callback function will trigger before data is sent
-                            $.mobile.loading('show', {theme:"a", text:"Getting addresses...", textonly:false, textVisible: true}); // show AJAX spinner
+                            //$.mobile.loading('show', {theme:"a", text:"Getting addresses...", textonly:false, textVisible: true}); // show AJAX spinner
+                            $('#ajax-modal-popup-address-search').popup("open");
                         },
                         complete: function() {
-                            // This callback function will trigger on data sent/received complete
-                            $.mobile.loading('hide'); // hide AJAX spinner
+                            $('#ajax-modal-popup-address-search').popup("close");   
                         },  
                         success: function (result) {
-                            //alert('ajax call successful. result='+ result);
                             ajax.parseJSONP(result);
                         },
                         error: function (request,error) {
@@ -414,7 +403,15 @@
                         We will never, ever sell, distribute nor contact you for any other purposes other than sending you the activation link.
                     </p>
                 </div>
-                
+
+                 <!-- ajax loading busy indicator popup -->
+                <div data-role="popup" id="ajax-modal-popup-save-new-address" class="ui-corner-all" data-dismissible="false" style="text-align:center; width:200px; height:70px;">
+                    <div class="box300 border" style="padding:10px;">
+                        <img src="img/ajax-loader.gif" style="text-align:left; vertical-align:middle;">
+                        Processing
+                    </div>
+                </div> 
+              
                 <div role="main" class="ui-content">
                     <h3>Enter your Garage Sale details</h3>
                         <div class="ui-field-contain">
@@ -524,6 +521,10 @@
                                 dataType: 'json', // request type html/json/xml
                                 data: $('#seller-form1').serialize(), 
                                 beforeSend: function() {
+                                    $('#ajax-modal-popup-save-new-address').popup("open");
+                                },
+                                complete: function() {
+                                    $('#ajax-modal-popup-save-new-address').popup("close");
                                 },
                                 success: function(data) {
                                     // show the success page
