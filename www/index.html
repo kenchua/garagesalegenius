@@ -131,15 +131,15 @@
                 <h3>Search for Garage Sales</h3>
                 
                 <!--<h4>1. I am coming from: (choose one)</h4>-->
-                <h4>1. Enter your location (Postal code, Zip code or Address) or tap Get my location</h4>
+                <h4>1. Enter your location or tap Get my location</h4>
                 <p></p>
                 <div class="ui-grid-solo">
                     <div class="ui-block-a">
                         <input type="text" id="buyerlocation" placeholder="Postal code, Zip code or Address"/>
                     </div>
                     <div class="ui-block-a">
-                        <!--<input type="button" data-icon="location" value="Use my location" id="usemylocation"/>-->
-                        <a id="getmylocation" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">Get my location</a>
+                        <!--<input type="button" data-icon="location" value="Use my location" id="getmygeolocation"/>-->
+                        <a id="getmygeolocation" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">Get my location</a>
                     </div>
                 </div>
                 <br/><br/>
@@ -172,27 +172,20 @@
         </div> 
         <script type="text/javascript">
     		$(document).on('pageinit', '#address-search-criteria-page', function(){      
-                        //alert('pageinit on address-search-criteria-page');
+                //alert('pageinit on address-search-criteria-page');
 
-    			$(document).on('click', '#usemylocation', function(){
+    			$(document).on('click', '#getmygeolocation', function(){
 
-    				if (navigator.geolocation) {
-    					function success(pos) {
-    						// Location found
-    						alert((new google.maps.LatLng(pos.coords.latitude, pos.coords.longitude)));
-    					}
-    					function fail(error) {
-    						alert("Cannot determine your location.");
-    					}
-    					// Find the users current position.  Cache the location for 5 minutes, timeout after 6 seconds
-    					navigator.geolocation.getCurrentPosition(success, fail, {maximumAge: 500000, enableHighAccuracy:true, timeout: 6000});
-    				}
+                    // perform geolocation
+                    // geolocation is async so show a progress dialog
+                    console.log('Getting buyer geolocation.');
+                    $('#ajax-modal-popup-address-search').popup("open");
+                    navigator.geolocation.getCurrentPosition(geoCodeBuyerLocationSuccess, geoCodeBuyerLocationError);
     			});
 
     			$(document).on('click', '#searchaddress', function(){ 
 
     			    var url = 'http://winskee.com/phonegap/garagesalegenius/get-active-garage-sales.php'; 
-
                     $.ajax({
                         url: url,
                         async: true,
@@ -207,12 +200,48 @@
                             ajax.parseJSONP(result);
                         },
                         error: function (request,error) {
-                            alert("Can't seem to reach our servers.  Is your internet connection OK?  Please try again!");
+                            navigator.notification.alert(
+                                "Can't seem to reach our servers.  Please check your internet connection.",
+                                geoCodeBuyerLocationAlertDismissed, // callback
+                                'Search',
+                                'OK'
+                            );
                         }
                     });         
-    			});        
+    			}); 
     		});
-    		var sellersVO = {
+
+            function geoCodeBuyerLocationSuccess(position) {
+                $('#ajax-modal-popup-address-search').popup("close");
+                var geoLocationInfo = 'Latitude: ' + position.coords.latitude              + '<br />' +
+                            'Longitude: '          + position.coords.longitude             + '<br />' +
+                            'Altitude: '           + position.coords.altitude              + '<br />' +
+                            'Accuracy: '           + position.coords.accuracy              + '<br />' +
+                            'Altitude Accuracy: '  + position.coords.altitudeAccuracy      + '<br />' +
+                            'Heading: '            + position.coords.heading               + '<br />' +
+                            'Speed: '              + position.coords.speed                 + '<br />' +
+                            'Timestamp: '          + position.timestamp          + '<br />';
+                
+                console.log('Buyer geolocation found. geoLocationInfo=' + geoLocationInfo);
+            }
+
+            // geoCodeBuyerLocationError callback receives a PositionError object
+            function geoCodeBuyerLocationError(error) {
+                $('#ajax-modal-popup-address-search').popup("close");
+                console.log('Buyer geolocation not found. error.code=' + error.code + ' error.message=' + error.message);
+                navigator.notification.alert(
+                    "Oops!  Unable to find your location.",
+                    geoCodeBuyerLocationAlertDismissed, // callback
+                    'Your Location',
+                    'OK'
+                );
+            }
+
+            function geoCodeBuyerLocationAlertDismissed() {
+                // do something
+            }
+
+            var sellersVO = {
     			id : null,
     			sellers : null,
                 sellerDetail: null
