@@ -9,22 +9,17 @@
         <meta name="msapplication-tap-highlight" content="no" />
         <title>Garage Sale Genius</title>
 
+        <link rel="stylesheet" type="text/css" href="css/Roboto.css" />    
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.3.min.css" /> 
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.iscrollview.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.iscrollview-pull.css" />
+        <link rel="stylesheet" type="text/css" href="css/gsgenius.css" />
         <!-- from themeroller -->
         <!--
         <link rel="stylesheet" href="themes/sample.min.css" />
         <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
         -->
-        
-        <link rel="stylesheet" type="text/css" href="css/Roboto.css" />
-        <!--<link rel="stylesheet" type="text/css" href="css/gsgenius.css" />-->
-        <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.3.min.css" /> 
-        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.iscrollview.css" />
-        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.iscrollview-pull.css" />
-        <style>
-            body {
-                font-family: "Roboto";
-            }
-        </style>
+
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
         <script type="text/javascript" src="js/jquery-2.1.1.js"></script> 
         <script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
@@ -136,7 +131,7 @@
                 <h3>Search for Garage Sales</h3>
                 
                 <!--<h4>1. I am coming from: (choose one)</h4>-->
-                <h4>1. Enter your location (Postal code, Zip code or Address) or press Get my location</h4>
+                <h4>1. Enter your location (Postal code, Zip code or Address) or tap Get my location</h4>
                 <p></p>
                 <div class="ui-grid-solo">
                     <div class="ui-block-a">
@@ -644,10 +639,12 @@
 
         <script>
             // legend: b2s = buyer to seller
-            var b2sDirectionsDisplay = new google.maps.DirectionsRenderer();
+            var b2sDirectionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
             var b2sDirectionsService = new google.maps.DirectionsService();
             var b2sMap;
             var b2sDrivingDirectionsRequest;
+            var buyerAddressLatLng;
+            var selectedSellerAddressLatLng;
             
             $(document).on('pageshow', '#view-seller-item-details-page',function(e,data) {
                 // set and display the seller's detail info
@@ -671,13 +668,15 @@
                 (sellersVO.sellerDetail.freebies)? $('#ro_freebies').show() : $('#ro_freebies').hide();
                 (sellersVO.sellerDetail.collectors_items)? $('#ro_collectors_items').show() : $('#ro_collectors_items').hide();
         
+                selectedSellerAddressLatLng = new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude);
+                
                 console.log('Rendering buyer to seller map');
                 $('#b2s-map-div').height(getRealContentHeight() / 2);   // TODO: need to know what height to set the div to, and not just guessing
 
                 // initially, source and destination latlngs are the same
                 b2sDrivingDirectionsRequest = {
-                    origin: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
-                    destination: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
+                    origin: selectedSellerAddressLatLng,
+                    destination: selectedSellerAddressLatLng,
                     travelMode: google.maps.TravelMode.DRIVING
                 };
                 
@@ -690,7 +689,7 @@
                 // create the buyer to seller map
                 b2sMap = new google.maps.Map(document.getElementById('b2s-map-canvas'), {
                     zoom: 15,
-                    center: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
+                    center: selectedSellerAddressLatLng,
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     panControl: false,
                     mapTypeControl: false,
@@ -712,12 +711,24 @@
                 if (includeDrivingDirections) {
                     // get driving directions from buyer to seller
                     // show map and directions from buyer to seller
-                    console.log('Calling DirectionsService.route...');
+                    console.log('Calling DirectionsService.route.');
                     b2sDirectionsService.route(b2sDrivingDirectionsRequest, function(response, status) {
                         if (status == google.maps.DirectionsStatus.OK) {
                             console.log('Got the directions.');
-                            b2sDirectionsDisplay.setMap(b2sMap);
+
+                            // origin/destination icons
+                            var directionsIcons = {
+                                start: new google.maps.MarkerImage('img/mapicon-buyer.png'),
+                                end: new google.maps.MarkerImage('img/mapicon-home.png')
+                            };
+
+                            console.log('Make the markers.');
+                            makeGMapMarker(buyerAddressLatLng, directionsIcons.start, "You");
+                            makeGMapMarker(selectedSellerAddressLatLng, directionsIcons.end, "Seller");
+
+                            console.log('Display the directions.');
                             $('#b2s-directions-panel').html('');    // clear previous directions
+                            b2sDirectionsDisplay.setMap(b2sMap);
                             b2sDirectionsDisplay.setPanel(document.getElementById('b2s-directions-panel'));
                             b2sDirectionsDisplay.setDirections(response);
 
@@ -732,15 +743,17 @@
                             */
                         } else {
                             console.log('Failed to get the directions. status = ' + status);
-                            $('#b2s-directions-panel').html("Sorry, no driving route found!  Map displays the seller's address.");
+                            $('#b2s-directions-panel').html("<br>Sorry, no driving route found!  Map displays the seller's address.");
 
                             console.log("Displaying the seller's address on the map.");
                             var bounds = new google.maps.LatLngBounds();
                             //var latlng = new google.maps.LatLng(b2sDrivingDirectionsRequest.destination);
-                            var latlng = new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude);
+                            var latlng = selectedSellerAddressLatLng;
+                            var houseIcon = new google.maps.MarkerImage('img/mapicon-home.png');
                             new google.maps.Marker({
                                 position: latlng,
-                                map: b2sMap
+                                map: b2sMap,
+                                icon: houseIcon
                             });
                             bounds.extend(latlng);
                             b2sMap.fitBounds(bounds);
@@ -750,12 +763,9 @@
                 } else {
                     // by default, show the seller's marker on the map
                     console.log('Placing map marker for ' + sellersVO.sellerDetail.formatted_address);
-                    var latlng = new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude);
-                    new google.maps.Marker({
-                        position: latlng,
-                        map: b2sMap
-                    });
-                    $('#b2s-directions-panel').html("<br>Press Get Driving Directions to get driving directions to the seller's address.");
+                    var latlng = selectedSellerAddressLatLng;
+                    makeGMapMarker(latlng, new google.maps.MarkerImage('img/mapicon-home.png'), 'Seller');
+                    $('#b2s-directions-panel').html("<br>Tap Get Driving Directions to get driving directions to the seller's address.");
                 }   // end if (includeDrivingDirections) {
                 
                 $("#map-tab").trigger("click");
@@ -765,19 +775,39 @@
             var geoCodeBuyerAddress = function() {
                 $("#buyer-address-popup").popup("close");
                 buyerAddressToGeoCode = $("#buyer_address").val();
-                
-                // actually, no need to geocode the buyer's address, as the driving directions request object can take either latlng or address string
-                //console.log('Geocoding buyer address: ' + buyerAddressToGeoCode);
 
-                b2sDrivingDirectionsRequest = {
-                    origin: buyerAddressToGeoCode,
-                    destination: new google.maps.LatLng(sellersVO.sellerDetail.latitude, sellersVO.sellerDetail.longitude),
-                    travelMode: google.maps.TravelMode.DRIVING
-                };
+                // geocoding is async
+                // geocode the buyer's address
+                console.log('Geocoding buyer address: ' + buyerAddressToGeoCode);
+                var geocoder = new google.maps.Geocoder();
+                geocoder.geocode({'address': buyerAddressToGeoCode}, function(results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+                        console.log('Geocoding successful.');
+                        buyerAddressLatLng = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
+                        
+                        b2sDrivingDirectionsRequest = {
+                            origin: buyerAddressLatLng,
+                            destination: selectedSellerAddressLatLng,
+                            travelMode: google.maps.TravelMode.DRIVING
+                        };
 
-                initBuyer2SellerMapAndDrivingDirections(true);
+                        initBuyer2SellerMapAndDrivingDirections(true);
+                    } else {
+                        console.log('Geocoding failed.');
+                    }
+                });
+
+
             }
 
+            var makeGMapMarker = function (position, icon, title) {
+                new google.maps.Marker({
+                    position: position,
+                    map: b2sMap,
+                    icon: icon,
+                    title: title
+                });
+            }
         </script>
         <!-- END PAGE: View Seller item details -->
         
