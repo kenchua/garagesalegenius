@@ -212,7 +212,6 @@
     		});
 
             function geoCodeBuyerLocationSuccess(position) {
-                $('#ajax-modal-popup-address-search').popup("close");
                 var geoLocationInfo = 'Latitude: ' + position.coords.latitude              + '<br />' +
                             'Longitude: '          + position.coords.longitude             + '<br />' +
                             'Altitude: '           + position.coords.altitude              + '<br />' +
@@ -223,6 +222,23 @@
                             'Timestamp: '          + position.timestamp          + '<br />';
                 
                 console.log('Buyer geolocation found. geoLocationInfo=' + geoLocationInfo);
+                console.log('Getting buyer address from geolocation.');
+                // get the address from the buyer's latlng
+                var geocoder = new google.maps.Geocoder();
+                var geolocationLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                
+                // geocoding is async
+                geocoder.geocode({'latLng': geolocationLatLng}, function(results, status) {
+                    if (status == google.maps.GeocoderStatus.OK) {
+
+                        $('#buyerlocation').html(results[0].formatted_address);
+                        console.log('Buyer location address: ' + results[0].formatted_address);
+                    } else {
+                        console.log('Buyer location address not found.');
+
+                    }
+                });
+                $('#ajax-modal-popup-address-search').popup("close");
             }
 
             // geoCodeBuyerLocationError callback receives a PositionError object
