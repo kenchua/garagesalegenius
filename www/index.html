@@ -192,6 +192,7 @@
                     // geolocation is async so show a progress dialog
                     console.log('Getting buyer geolocation.');
                     $('#ajax-modal-popup-address-search').popup("open");
+                    //navigator.notification.loadingStart();
                     navigator.geolocation.getCurrentPosition(geoCodeBuyerLocationSuccess, geoCodeBuyerLocationError);
     			});
 
@@ -208,20 +209,56 @@
                         geocoder.geocode({'address': buyerLocationToGeoCode}, function(results, status) {
                             if (status == google.maps.GeocoderStatus.OK) {
                                 geolocationLatLng = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
-                                console.log('Geocoding successful. Buyer location latlng: ' + geolocationLatLng);
+                                geoLocationFormattedAddress = results[0].formatted_address;
+                                console.log('Geocoding successful. Buyer location latlng: ' + geolocationLatLng + ' formatted address: ' + geoLocationFormattedAddress);
 
-                                performSearch();  
+                                performSearch();
 
                             } else {
                                 $('#ajax-modal-popup-address-search').popup("close");
                                 console.log('Geocoding failed.  Search aborted.');
+                                alert('Search failed.  Please verify you entered a valid location or check your internet connection.');
+                                navigator.notification.alert(
+                                    "Search failed.  Please verify you entered a valid location or check your internet connection.",
+                                    geoCodeBuyerLocationAlertDismissed, // callback
+                                    'Search',
+                                    'OK'
+                                );
                             }
                         });                        
                     } else {
-                        console.log('Buyer location latlng: ' + geolocationLatLng);
-                        console.log('Buyer location formatted address: ' + geoLocationFormattedAddress);
+                        console.log('Previous Buyer location latlng: ' + geolocationLatLng);
+                        console.log('Previous Buyer location formatted address: ' + geoLocationFormattedAddress);
 
-                        performSearch();
+                        // it is possible that the user has changed/edited the buyer address field to an address that is
+                        // different than the last geolocated address.  therefore, we should geocode the address field again.
+
+                        // geocoding is async
+                        // geocode the buyer's address
+                        $('#ajax-modal-popup-address-search').popup("open");
+                        var buyerLocationToGeoCode = $('#buyerlocation').val();
+                        console.log('Geocoding buyer location: ' + buyerLocationToGeoCode);
+                        var geocoder = new google.maps.Geocoder();
+                        geocoder.geocode({'address': buyerLocationToGeoCode}, function(results, status) {
+                            if (status == google.maps.GeocoderStatus.OK) {
+                                geolocationLatLng = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
+                                geoLocationFormattedAddress = results[0].formatted_address;
+                                console.log('Geocoding successful. Buyer location latlng: ' + geolocationLatLng + ' formatted address: ' + geoLocationFormattedAddress);
+
+                                performSearch();
+
+                            } else {
+                                $('#ajax-modal-popup-address-search').popup("close");
+                                console.log('Geocoding failed.  Search aborted.');
+                                alert('Search failed.  Please verify you entered a valid location or check your internet connection.');
+                                navigator.notification.alert(
+                                    "Search failed.  Please verify you entered a valid location or check your internet connection.",
+                                    geoCodeBuyerLocationAlertDismissed, // callback
+                                    'Search',
+                                    'OK'
+                                );
+                            }
+                        }); 
                     }
 
     			}); 
@@ -244,29 +281,32 @@
                 geolocationLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                 
                 // geocoding is async
+                // get the formatted address
                 geocoder.geocode({'latLng': geolocationLatLng}, function(results, status) {
                     if (status == google.maps.GeocoderStatus.OK) {
                         geoLocationFormattedAddress = results[0].formatted_address;
                         $('#buyerlocation').val(geoLocationFormattedAddress);
-                        console.log('Buyer location address: ' + geoLocationFormattedAddress);
+                        console.log('Buyer location formatted address: ' + geoLocationFormattedAddress);
                     } else {
-                        console.log('Buyer location address not found.');
+                        console.log('Buyer location formatted address not found.');
 
                     }
                 });
                 $('#ajax-modal-popup-address-search').popup("close");
+                //navigator.notification.loadingStop();
             }
 
             // geoCodeBuyerLocationError callback receives a PositionError object
             function geoCodeBuyerLocationError(error) {
                 $('#ajax-modal-popup-address-search').popup("close");
                 console.log('Buyer geolocation not found. error.code=' + error.code + ' error.message=' + error.message);
-                navigator.notification.alert(
+                alert('Oops!  Unable to find your location.');
+/*                navigator.notification.alert(
                     "Oops!  Unable to find your location.",
                     geoCodeBuyerLocationAlertDismissed, // callback
                     'Your Location',
                     'OK'
-                );
+                );*/
             }
 
             function geoCodeBuyerLocationAlertDismissed() {
@@ -290,12 +330,13 @@
                         ajax.parseJSONP(result);
                     },
                     error: function (request,error) {
-                        navigator.notification.alert(
+                        alert('Search failed.  Please check your internet connection.');
+/*                        navigator.notification.alert(
                             "Can't seem to reach our servers.  Please check your internet connection.",
                             geoCodeBuyerLocationAlertDismissed, // callback
                             'Search',
                             'OK'
-                        );
+                        );*/
                     }
                 }); 
             }
@@ -682,45 +723,21 @@
                     <div id="ro_freebies" style="display:none;">Surprise freebies available&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
                     <div id="ro_collectors_items" style="display:none;">Collector's Items&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
                     
-                    <!-- buyer to seller map and directions -->
-                    <div style="width:100%; padding-top:10px;">
-                        <h3 id="map-and-directions-header" style="display:none; float:left;margin-right:10px;">Map and Driving directions to Seller's location</h3>
-                        <!--
-                        <input type="button" data-icon="location" data-inline="true" value="Get Driving Directions" id="get-driving-directions" style="float:right;"/>
-                        -->
-                        <a id="get-driving-directions" href="#buyer-address-popup" data-rel="popup" data-position-to="window" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a" data-transition="pop">Get Driving Directions</a>
-                    </div>
+                    <!-- buyer to seller directions -->
+                    <h3 id="directions-to-seller-header">Driving directions to Seller's address</h3>
+                    <a id="view-buyer-seller-directions-map" href="#buyer-seller-driving-directions-map-page" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">View Map</a>
 
-                    <!--
-                    <div id="b2s-map-div" style="width:100%;clear:left;">
-                        <div id="b2s-map-canvas" style="width:48%; height:100%;; border: 1px solid silver; float:left;"></div>
-                        <div id="b2s-directions-panel" style="width:48%; height:100%; float:right;"></div>
-                    </div>
-                    -->
-
-                    <!-- map and driving directions tabbed interface -->
-                    <div data-role="tabs" id="b2s-map-div" style="width:100%; clear:left; margin-top:10px;">
-                        <div data-role="navbar">
-                            <ul>
-                                <li><a id="map-tab" href="#fragment-map">Map</a></li>
-                                <li><a href="#fragment-directions">Driving Directions</a></li>
-                            </ul>
-                        </div>
-                        <div id="fragment-map" style="height:360px;">
-                            <div id="b2s-map-canvas" style="width:100%; height:100%;"></div>
-                        </div>
-                        <div id="fragment-directions">
-                            <!-- google map directions from buyer to seller's location -->
-                            <div id="b2s-directions-panel" style="width:100%; height:100%;"></div>
-                        </div>
-                    </div>
+                    <div id="b2s-map-canvas" style="display:none;width:100%;height:400px;"></div>
+                    <div id="b2s-directions-panel" style="width:100%;"></div>
                     
                 </div>
 
-                <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+                <!--
+                 <div data-role="footer" data-position="fixed" data-tap-toggle="false">
                     <input type="button" data-icon="delete" value="Cancel" id="cancel"/>    
                     <input type="submit" data-icon="check" value="Submit" id="submit"/>
                 </div>
+                -->
             </form>
         </div> 
 
@@ -732,7 +749,11 @@
             var b2sDrivingDirectionsRequest;
             var buyerAddressLatLng;
             var selectedSellerAddressLatLng;
-            
+            var b2sDrivingDirectionsIcons = {
+                start: new google.maps.MarkerImage('img/mapicon-buyer.png'),
+                end: new google.maps.MarkerImage('img/mapicon-home.png')
+            };
+
             $(document).on('pageshow', '#view-seller-item-details-page',function(e,data) {
                 // set and display the seller's detail info
                 
@@ -760,104 +781,44 @@
                 console.log('Rendering buyer to seller map');
                 $('#b2s-map-div').height(getRealContentHeight() / 2);   // TODO: need to know what height to set the div to, and not just guessing
 
-                // initially, source and destination latlngs are the same
+                // set buyer and seller directions request
+                /*
                 b2sDrivingDirectionsRequest = {
-                    origin: selectedSellerAddressLatLng,
+                    origin: geolocationLatLng,
                     destination: selectedSellerAddressLatLng,
                     travelMode: google.maps.TravelMode.DRIVING
                 };
-                
-                initBuyer2SellerMapAndDrivingDirections(false);
+                */
+                b2sDrivingDirectionsRequest = {
+                    origin: geoLocationFormattedAddress,
+                    destination: sellersVO.sellerDetail.formatted_address,
+                    travelMode: google.maps.TravelMode.DRIVING
+                };               
+                initBuyer2SellerDrivingDirections();
 
             });
             
-            var initBuyer2SellerMapAndDrivingDirections = function(includeDrivingDirections) {
-                console.log('Initializing buyer to seller map and driving directions.');
-                // create the buyer to seller map
-                b2sMap = new google.maps.Map(document.getElementById('b2s-map-canvas'), {
-                    zoom: 15,
-                    center: selectedSellerAddressLatLng,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP,
-                    panControl: false,
-                    mapTypeControl: false,
-                    panControlOptions: {
-                        position: google.maps.ControlPosition.RIGHT_CENTER
-                    },
-                    zoomControl: false,
-                    zoomControlOptions: {
-                        style: google.maps.ZoomControlStyle.LARGE,
-                        position: google.maps.ControlPosition.RIGHT_CENTER
-                    },
-                    scaleControl: false,
-                    streetViewControl: false,
-                    streetViewControlOptions: {
-                        position: google.maps.ControlPosition.RIGHT_CENTER
+            var initBuyer2SellerDrivingDirections = function() {
+                console.log('Initializing buyer to seller driving directions.');
+
+                // get driving directions from buyer to seller
+                // show map and directions from buyer to seller
+                console.log('Calling DirectionsService.route to get text directions.');
+                b2sDirectionsService.route(b2sDrivingDirectionsRequest, function(response, status) {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        console.log('Got the directions.');
+                        console.log('Display the directions.');
+                        $('#b2s-directions-panel').html('');    // clear previous directions
+                        b2sDirectionsDisplay.setPanel(document.getElementById('b2s-directions-panel'));
+                        b2sDirectionsDisplay.setDirections(response);
+
+                    } else {
+                        console.log('Failed to get the directions. status = ' + status);
+                        $('#b2s-directions-panel').html("<br>Sorry, no driving route found!  Map displays the seller's address.");
                     }
                 });
 
-                if (includeDrivingDirections) {
-                    // get driving directions from buyer to seller
-                    // show map and directions from buyer to seller
-                    console.log('Calling DirectionsService.route.');
-                    b2sDirectionsService.route(b2sDrivingDirectionsRequest, function(response, status) {
-                        if (status == google.maps.DirectionsStatus.OK) {
-                            console.log('Got the directions.');
-
-                            // origin/destination icons
-                            var directionsIcons = {
-                                start: new google.maps.MarkerImage('img/mapicon-buyer.png'),
-                                end: new google.maps.MarkerImage('img/mapicon-home.png')
-                            };
-
-                            console.log('Make the markers.');
-                            makeGMapMarker(buyerAddressLatLng, directionsIcons.start, "You");
-                            makeGMapMarker(selectedSellerAddressLatLng, directionsIcons.end, "Seller");
-
-                            console.log('Display the directions.');
-                            $('#b2s-directions-panel').html('');    // clear previous directions
-                            b2sDirectionsDisplay.setMap(b2sMap);
-                            b2sDirectionsDisplay.setPanel(document.getElementById('b2s-directions-panel'));
-                            b2sDirectionsDisplay.setDirections(response);
-
-                            // increase map height if needed
-                            var directionsDivHeight = $('#b2s-directions-panel').outerHeight(true);
-                            var mapCanvasHeight = $('#b2s-map-canvas').outerHeight(true);
-                            /*
-                            if (mapCanvasHeight < directionsDivHeight) {
-                                //$('#b2s-map-canvas').height(directionsDivHeight);
-                                $('#b2s-map-div').equalHeights();
-                            }
-                            */
-                        } else {
-                            console.log('Failed to get the directions. status = ' + status);
-                            $('#b2s-directions-panel').html("<br>Sorry, no driving route found!  Map displays the seller's address.");
-
-                            console.log("Displaying the seller's address on the map.");
-                            var bounds = new google.maps.LatLngBounds();
-                            //var latlng = new google.maps.LatLng(b2sDrivingDirectionsRequest.destination);
-                            var latlng = selectedSellerAddressLatLng;
-                            var houseIcon = new google.maps.MarkerImage('img/mapicon-home.png');
-                            new google.maps.Marker({
-                                position: latlng,
-                                map: b2sMap,
-                                icon: houseIcon
-                            });
-                            bounds.extend(latlng);
-                            b2sMap.fitBounds(bounds);
-
-                        }
-                    });
-                } else {
-                    // by default, show the seller's marker on the map
-                    console.log('Placing map marker for ' + sellersVO.sellerDetail.formatted_address);
-                    var latlng = selectedSellerAddressLatLng;
-                    makeGMapMarker(latlng, new google.maps.MarkerImage('img/mapicon-home.png'), 'Seller');
-                    $('#b2s-directions-panel').html("<br>Tap Get Driving Directions to get driving directions to the seller's address.");
-                }   // end if (includeDrivingDirections) {
-                
-                $("#map-tab").trigger("click");
-
-            }   // end var initBuyer2SellerMapAndDrivingDirections
+            }
 
             var geoCodeBuyerAddress = function() {
                 $("#buyer-address-popup").popup("close");
@@ -878,26 +839,112 @@
                             travelMode: google.maps.TravelMode.DRIVING
                         };
 
-                        initBuyer2SellerMapAndDrivingDirections(true);
+                        initBuyer2SellerDrivingDirections();
                     } else {
-                        console.log('Geocoding failed.');
+                        console.log('Geocoding failed. status = ' + status);
                     }
                 });
 
 
             }
 
-            var makeGMapMarker = function (position, icon, title) {
-                new google.maps.Marker({
+            var makeGMapMarker = function (map, position, icon, title) {
+                var marker = new google.maps.Marker({
                     position: position,
-                    map: b2sMap,
+                    map: map,
                     icon: icon,
                     title: title
                 });
+                return marker;
             }
         </script>
         <!-- END PAGE: View Seller item details -->
         
+
+        <!-- BEGIN PAGE: View Buyer to Seller driving directions in map -->
+        <div data-role="page" id="buyer-seller-driving-directions-map-page">
+            <div data-role="header" data-position="fixed">
+                <h3>
+            Search results in map
+                </h3>
+                <a href="#address-search-results-map-page" data-icon="navigation" class="ui-btn-left" data-rel="back">Back</a>
+            </div>   
+
+            <div data-role="content" id="buyer-seller-driving-directions-map-div">
+                <div id="b2s-driving-directions-map-canvas" style="height:400px;width:100%;"></div>
+            </div>
+
+            <div data-role="footer" data-position="fixed" data-tap-toggle="false">
+                <h3>Footer</h3>
+            </div>    
+        </div> 
+        <script>
+            var b2sDirectionsMap;
+
+            $(document).on('pageshow', '#buyer-seller-driving-directions-map-page',function(e,data) {   
+                $('#buyer-seller-driving-directions-map-div').height(getRealContentHeight());
+
+                /*
+                console.log('Copying map from previous page div to map div on this page.');
+                $('#b2s-map-canvas').css('display', 'block');
+                var mapNode = b2sMap.getDiv();
+                $('#b2s-driving-directions-map-canvas').append(mapNode);
+                */
+
+                console.log('Creating buyer to seller driving directions map.');
+                b2sDirectionsMap = new google.maps.Map(document.getElementById('b2s-driving-directions-map-canvas'), {
+                    zoom: 15,
+                    center: selectedSellerAddressLatLng,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    panControl: false,
+                    mapTypeControl: false,
+                    panControlOptions: {
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    zoomControl: true,
+                    zoomControlOptions: {
+                        style: google.maps.ZoomControlStyle.LARGE,
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    },
+                    scaleControl: true,
+                    streetViewControl: true,
+                    streetViewControlOptions: {
+                        position: google.maps.ControlPosition.RIGHT_CENTER
+                    }
+                });
+
+                b2sDrivingDirectionsRequest = {
+                    origin: geoLocationFormattedAddress,
+                    destination: sellersVO.sellerDetail.formatted_address,
+                    travelMode: google.maps.TravelMode.DRIVING
+                }; 
+
+                initBuyer2SellerMapDirections();
+            });
+
+            var initBuyer2SellerMapDirections = function() {
+                console.log('Calling DirectionsService.route to show map route.');
+                b2sDirectionsService.route(b2sDrivingDirectionsRequest, function(response, status) {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        console.log('Got the directions.');
+
+                        console.log('Make the buyer and seller driving directions markers.');
+                        makeGMapMarker(b2sDirectionsMap, geolocationLatLng, b2sDrivingDirectionsIcons.start, "You");
+                        makeGMapMarker(b2sDirectionsMap, selectedSellerAddressLatLng, b2sDrivingDirectionsIcons.end, "Seller");
+
+                        console.log('Display the map route.');
+                        b2sDirectionsDisplay.setMap(b2sDirectionsMap);
+                        b2sDirectionsDisplay.setDirections(response);
+                    } else {
+                        console.log("Failed to get directions.  Default map to seller's address.");
+                        console.log('Placing map marker for ' + sellersVO.sellerDetail.formatted_address);
+                        makeGMapMarker(b2sDirectionsMap, selectedSellerAddressLatLng, b2sDrivingDirectionsIcons.end, 'Seller');
+                    }
+                });
+            }
+        </script>
+        <!-- END PAGE: View Buyer to Seller driving directions in map -->
+
 
         <!-- BEGIN PAGE: Thank you for posting -->
         <div data-role="page" id="thank-you-for-posting-page">
