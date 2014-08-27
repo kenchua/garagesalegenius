@@ -19,7 +19,10 @@
         <link rel="stylesheet" href="themes/sample.min.css" />
         <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
         -->
+<style>
+.ui-li-desc {text-overflow: normal;overflow: visible;white-space:  pre-wrap;}
 
+</style>
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
         <script type="text/javascript" src="js/jquery-2.1.1.js"></script> 
         <script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
@@ -404,7 +407,7 @@
                     // assemble the custom address row
                     var addressStaticGMapUrl = 'http://maps.googleapis.com/maps/api/staticmap?center=' + row.latitude + ',' + row.longitude + '&zoom=17&size=100x100&maptype=roadmap&markers=' + row.latitude + ',' + row.longitude;
 
-                    $('#address-list').append('<li><a href="" data-id="' + row.id + '">' + '<img src="' + addressStaticGMapUrl + '"/>'  + '<h3>' + row.formatted_address + '</h3><p>When:&nbsp;' + row.start_time + '&nbsp;-&nbsp;' + row.end_time + '</p></a></li>');
+                    $('#address-list').append('<li><a href="" data-id="' + row.id + '">' + '<img src="' + addressStaticGMapUrl + '"/>'  + '<h3>' + row.formatted_address + '</h3><p>When:&nbsp;' + row.start_time + '&nbsp;-&nbsp;' + row.end_time + '</p><p style="color:green;">' + truncateDecimals(row.distance, 2) + ' km(s) away</p></a></li>');
                 });
                 $('#address-list').listview('refresh');
                 $(".listview-wrapper").iscrollview("refresh");
