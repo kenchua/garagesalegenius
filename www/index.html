@@ -175,16 +175,18 @@
             var searchUrl = 'http://winskee.com/phonegap/garagesalegenius/get-active-garage-sales.php'; 
             var geolocationLatLng;
             var geoLocationFormattedAddress;
+            var searchRadius;
 
             $(document).on('pagebeforeshow', '#address-search-criteria-page', function(){ 
                 console.log('Initialize address search criteria page.');
                 geolocationLatLng = null;
                 geoLocationFormattedAddress = null;
                 $('#buyerlocation').val('');
+                $('#searchradius').val(1);
             });    
 
-    		$(document).on('pageinit', '#address-search-criteria-page', function(){      
-                //alert('pageinit on address-search-criteria-page');
+    		$(document).on('pagebeforeshow', '#address-search-criteria-page', function(){      
+                console.log('pagebeforeshow on address-search-criteria-page triggered.');
 
     			$(document).on('click', '#getmygeolocation', function(){
 
@@ -197,7 +199,8 @@
     			});
 
     			$(document).on('click', '#searchaddress', function(){ 
-
+                    searchRadius = $('#searchradius').val() * .6214;    // convert into miles
+                    console.log('Search radius: ' + searchRadius + ' miles');
                     if (geolocationLatLng == null) {
                         console.log('Buyer location latlng still undefined.');
                         // geocoding is async
@@ -211,6 +214,8 @@
                                 geolocationLatLng = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
                                 geoLocationFormattedAddress = results[0].formatted_address;
                                 console.log('Geocoding successful. Buyer location latlng: ' + geolocationLatLng + ' formatted address: ' + geoLocationFormattedAddress);
+
+                                searchUrl = 'http://winskee.com/phonegap/garagesalegenius/get-active-garage-sales.php' + '?latitude=' + results[0].geometry.location.lat() + '&longitude=' + results[0].geometry.location.lng() + '&search_radius=' + searchRadius;
 
                                 performSearch();
 
@@ -244,6 +249,8 @@
                                 geolocationLatLng = new google.maps.LatLng(results[0].geometry.location.lat(), results[0].geometry.location.lng());
                                 geoLocationFormattedAddress = results[0].formatted_address;
                                 console.log('Geocoding successful. Buyer location latlng: ' + geolocationLatLng + ' formatted address: ' + geoLocationFormattedAddress);
+
+                                searchUrl = 'http://winskee.com/phonegap/garagesalegenius/get-active-garage-sales.php' + '?latitude=' + results[0].geometry.location.lat() + '&longitude=' + results[0].geometry.location.lng() + '&search_radius=' + searchRadius;
 
                                 performSearch();
 
@@ -315,6 +322,7 @@
 
             function performSearch() {
                 console.log('Begin search.');
+                console.log('Search url: ' + searchUrl);
                 $.ajax({
                     url: searchUrl,
                     async: true,
@@ -323,7 +331,7 @@
                         $('#ajax-modal-popup-address-search').popup("open");
                     },
                     complete: function() {
-                        console.log('Search done.');
+                        console.log('Search complete.');
                         $('#ajax-modal-popup-address-search').popup("close");   
                     },  
                     success: function (result) {
@@ -348,7 +356,8 @@
     		var ajax = {  
     			parseJSONP:function(result) {  
     				sellersVO.sellers = result;
-                    console.log('Addresses found: ' + sellersVO.sellers);
+                    
+                    console.log('# of sellers found: ' + sellersVO.sellers.length);
 
     				// show the results page
     				$(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-page', {
@@ -382,16 +391,16 @@
             </div>    
         </div> 
         <script type="text/javascript">
-            $(document).on('pageinit', '#address-search-results-page', function(){
-                //alert('pageinit on address-search-results-page');
+            $(document).on('pagebeforeshow', '#address-search-results-page', function(){
+                console.log('pagebeforeshow on address-search-results-page triggered.');
                 // populate search results
                 $('#address-list').empty();        
                 $.each(sellersVO.sellers, function(i, row) {
 
                     // append the gui_selected attribute that we will use to store the user's selection of this address
                     row.gui_selected = false;
-                    console.log('Seller: ' + JSON.stringify(row));
-
+                    console.log('Seller JSON: ' + JSON.stringify(row));
+                    
                     // assemble the custom address row
                     var addressStaticGMapUrl = 'http://maps.googleapis.com/maps/api/staticmap?center=' + row.latitude + ',' + row.longitude + '&zoom=17&size=100x100&maptype=roadmap&markers=' + row.latitude + ',' + row.longitude;
 
@@ -693,7 +702,6 @@
         <div data-role="page" id="view-seller-item-details-page">
             <form id="ro-seller-form1">
                 <div data-role="header" data-position="fixed">
-                    <h3>Seller's Info</h3>
                 </div>   
                 
                 <!-- prompt for buyer address popup -->
@@ -732,6 +740,14 @@
                     
                 </div>
 
+                <!-- right panel menu -->
+                <div class="panel right" data-role="panel" data-position="right" data-display="overlay" id="panel-02">
+                    <ul>
+                        <li><a href="#" title="John Doe"><span class="avatar"><img src="img/mambows_120.jpg" width="30" height="30"></span>John Doe</a></li>
+                        <li><a href="#" title="Jessy Doe"><span class="avatar"><img src="img/mkalalang_120.jpg" width="30" height="30"></span>Jessy Doe</a></li>
+                    </ul>
+                </div>
+                
                 <!--
                  <div data-role="footer" data-position="fixed" data-tap-toggle="false">
                     <input type="button" data-icon="delete" value="Cancel" id="cancel"/>    
