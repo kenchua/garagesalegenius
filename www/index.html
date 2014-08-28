@@ -67,6 +67,14 @@
         REUSABLE OBJECTS BELOW
         ======================
         -->          
+        <div data-role="panel" id="leftpanel1" data-position="left" data-display="reveal" data-theme="a">
+
+            <h3>Left Panel: Reveal</h3>
+            <p>This panel is positioned on the left with the reveal display mode. The panel markup is <em>after</em> the header, content and footer in the source order.</p>
+            <p>To close, click off the panel, swipe left or right, hit the Esc key, or use the button below:</p>
+            <a href="#demo-links" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-a ui-icon-delete ui-btn-icon-left ui-btn-inline">Close panel</a>
+
+        </div><!-- /leftpanel1 -->
     
         
 
@@ -79,9 +87,7 @@
         <!-- BEGIN PAGE: Select Buy or Sell -->
         <div data-role="page" id="select-buy-or-sell-page">
             <div data-role="header" data-position="fixed">
-                <h3>
-                    Buy or Sell
-                </h3>
+                <h1>gsgenius</h1>
             </div>   
 
             <div role="main" class="ui-content">
@@ -116,7 +122,8 @@
         <!-- BEGIN PAGE: Address search criteria -->
         <div data-role="page" id="address-search-criteria-page">
             <div data-role="header" data-position="fixed">
-                <h3>Search for Sellers</h3>
+                <h1>gsgenius</h1>
+                <a href="#leftpanel1" class="ui-btn ui-shadow ui-corner-all ui-btn-inline ui-mini">Reveal</a>
             </div>   
 
              <!-- ajax loading busy indicator popup -->
@@ -128,7 +135,7 @@
             </div> 
 
             <div role="main" class="ui-content">
-                <h3>Search for Garage Sales</h3>
+                <h2>Search for Garage Sales</h2>
                 
                 <!--<h4>1. I am coming from: (choose one)</h4>-->
                 <h4>1. Enter your location or tap Get my location</h4>
@@ -373,9 +380,7 @@
         <!-- BEGIN PAGE: Address search results -->
         <div data-role="page" id="address-search-results-page">
             <div data-role="header" data-position="fixed">
-                <h3>
-                    Address search results
-                </h3>
+                <h1>gsgenius</h1>
                 <!--
                 <a href="#address-search-results-map-page" data-icon="navigation" class="ui-btn-right">View in map</a>
                 -->
@@ -452,12 +457,10 @@
         <!-- BEGIN PAGE: Address search results in map -->
         <div data-role="page" id="address-search-results-map-page">
             <div data-role="header" data-position="fixed">
-                <h3>
-			Search results in map
-                </h3>
+                <h1>gsgenius</h1>
             </div>   
 
-            <div data-role="content" id="search-results-map-div" style='position:relative;'>
+            <div data-role="content" id="search-results-map-div" style='position:relative; padding:0;'>
                 <div id='search-results-map-house-number'></div>
                 <div id="search-results-map-canvas" style="height:100%"></div>
             </div>
@@ -551,7 +554,7 @@
         <div data-role="page" id="enter-seller-item-details-page">
             <form id="seller-form1">
                 <div data-role="header" data-position="fixed">
-                    <h3>Sell</h3>
+                    <h1>gsgenius</h1>
                 </div>   
 
                 <!-- A popup div has to be nested inside the same page as the link! -->
@@ -738,7 +741,7 @@
         <div data-role="page" id="view-seller-item-details-page">
             <form id="ro-seller-form1">
                 <div data-role="header" data-position="fixed">
-                    <h3>Seller Details</h3>
+                    <h1>gsgenius</h1>
                 </div>   
                 
                 <!-- prompt for buyer address popup -->
@@ -917,9 +920,7 @@
         <!-- BEGIN PAGE: View Buyer to Seller driving directions in map -->
         <div data-role="page" id="buyer-seller-driving-directions-map-page">
             <div data-role="header" data-position="fixed">
-                <h3>
-            Search results in map
-                </h3>
+                <h1>gsgenius</h1>
                 <a href="#address-search-results-map-page" data-icon="navigation" class="ui-btn-left" data-rel="back">Back</a>
             </div>   
 
@@ -1002,9 +1003,7 @@
         <!-- BEGIN PAGE: Thank you for posting -->
         <div data-role="page" id="thank-you-for-posting-page">
             <div data-role="header" data-position="fixed">
-                <h3>
-			Buy or Sell
-                </h3>
+                <h1>gsgenius</h1>
             </div>   
 
             <div role="main" class="ui-content post-thank-you">

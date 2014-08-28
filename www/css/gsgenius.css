@@ -16,7 +16,14 @@ body {
 .infowindow-seller-address {
     font-family: "Roboto Condensed";
 }
-
+h1 {
+    font-family: "Roboto";
+    font-weight: bold;
+    font-size: 22px !important;
+}
+h3 {
+    font-family: "Roboto Condensed";
+}
 /*
 .ui-content {
     padding: 14px !important;
