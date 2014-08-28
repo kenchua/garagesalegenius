@@ -1,6 +1,22 @@
 body {
     font-family: "Roboto";
 }
+
+#search-results-map-house-number {
+    position: absolute;
+    top: 10px; left: 1px;
+    width: 120px; height: 100%;
+    display: none; /* start off hidden */
+    z-index: 10; /* make sure this div is on top of the map */ 
+}
+
+#infowindow-content {
+    overflow:hidden;
+}
+.infowindow-seller-address {
+    font-family: "Roboto Condensed";
+}
+
 /*
 .ui-content {
     padding: 14px !important;

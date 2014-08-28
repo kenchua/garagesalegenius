@@ -19,10 +19,7 @@
         <link rel="stylesheet" href="themes/sample.min.css" />
         <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
         -->
-<style>
-.ui-li-desc {text-overflow: normal;overflow: visible;white-space:  pre-wrap;}
 
-</style>
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
         <script type="text/javascript" src="js/jquery-2.1.1.js"></script> 
         <script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
@@ -379,7 +376,9 @@
                 <h3>
                     Address search results
                 </h3>
+                <!--
                 <a href="#address-search-results-map-page" data-icon="navigation" class="ui-btn-right">View in map</a>
+                -->
             </div>   
 
             <div role="main" class="ui-content">
@@ -389,11 +388,19 @@
                 </div>
             </div>
 
-            <div data-role="footer" data-position="fixed" data-tap-toggle="false">
-                <h3>Footer</h3>
+            <div id="mapview-results" data-role="footer" data-position="fixed" data-tap-toggle="false">
+                <h3>Map View</h3>
             </div>    
         </div> 
         <script type="text/javascript">
+            $(document).on('vclick', '#mapview-results', function(){ 
+                console.log('Map view of results requested.');
+                // show the search results on the map
+                $(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-map-page', {
+                    reload: false
+                });
+            });
+            
             $(document).on('pagebeforeshow', '#address-search-results-page', function(){
                 console.log('pagebeforeshow on address-search-results-page triggered.');
                 // populate search results
@@ -407,7 +414,7 @@
                     // assemble the custom address row
                     var addressStaticGMapUrl = 'http://maps.googleapis.com/maps/api/staticmap?center=' + row.latitude + ',' + row.longitude + '&zoom=17&size=100x100&maptype=roadmap&markers=' + row.latitude + ',' + row.longitude;
 
-                    $('#address-list').append('<li><a href="" data-id="' + row.id + '">' + '<img src="' + addressStaticGMapUrl + '"/>'  + '<h3>' + row.formatted_address + '</h3><p>When:&nbsp;' + row.start_time + '&nbsp;-&nbsp;' + row.end_time + '</p><p style="color:green;">' + truncateDecimals(row.distance, 2) + ' km(s) away</p></a></li>');
+                    $('#address-list').append('<li><a href="" data-id="' + row.id + '">' + '<img src="' + addressStaticGMapUrl + '"/>'  + '<h3>' + row.formatted_address + '</h3><p>When:&nbsp;' + row.start_time + '&nbsp;-&nbsp;' + row.end_time + '</p><p style="color:green;">' + truncateDecimals(row.distance *1.60934, 2) + ' km(s) away</p></a></li>');
                 });
                 $('#address-list').listview('refresh');
                 $(".listview-wrapper").iscrollview("refresh");
@@ -448,24 +455,44 @@
                 <h3>
 			Search results in map
                 </h3>
-                <a href="#address-search-results-map-page" data-icon="navigation" class="ui-btn-left" data-rel="back">Back</a>
             </div>   
 
-            <div data-role="content" id="search-results-map-div">
+            <div data-role="content" id="search-results-map-div" style='position:relative;'>
+                <div id='search-results-map-house-number'></div>
                 <div id="search-results-map-canvas" style="height:100%"></div>
             </div>
 
+            <!--
             <div data-role="footer" data-position="fixed" data-tap-toggle="false">
-                <h3>Footer</h3>
-            </div>    
+                <a href="#address-search-results-map-page" data-icon="navigation" class="ui-btn-left" data-rel="back">Back</a>
+            </div>   
+            -->
+            
+            <div id="listview-results" data-role="footer" data-position="fixed" data-tap-toggle="false">
+                <h3>List View</h3>
+            </div>               
         </div> 
         <script>
+            var lastSellerInfoWindow;
+            
+            $(document).on('vclick', '#listview-results', function(){ 
+                console.log('List view of results requested.');
+                // show the search results page
+                $(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-page', {
+                    reload: false
+                });
+            });
+            
+            $(document).on('click', '#mapview-footer', function() {
+                console.log('Map view requested for search results.');
+            });
+            
             $(document).on('pageshow', '#address-search-results-map-page',function(e,data) {   
                 $('#search-results-map-div').height(getRealContentHeight());
                 // This is the minimum zoom level that we'll allow
                 var minZoomLevel = 12;
 
-                var map = new google.maps.Map(document.getElementById('search-results-map-canvas'), {
+                var searchResultsMap = new google.maps.Map(document.getElementById('search-results-map-canvas'), {
                     zoom: minZoomLevel,
                     center: new google.maps.LatLng(38.50, -90.50),
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
@@ -489,14 +516,20 @@
                 var bounds = new google.maps.LatLngBounds();
                 $.each(sellersVO.sellers, function(i, row) {
                     var latlng = new google.maps.LatLng(row.latitude, row.longitude);
-                    new google.maps.Marker({
-                        position: latlng,
-                        map: map
-                    });
+                    var marker = makeGMapMarker(searchResultsMap, latlng, b2sDrivingDirectionsIcons.end, '');
                     bounds.extend(latlng);
 
+                    var contentString = '<div id="infowindow-content">' + '<span class="infowindow-seller-address">' + row.formatted_address + '</span>' + '<hr/>Starting: ' + row.start_time + '</div>';
+                    var infoWindow = new google.maps.InfoWindow({
+                        content: contentString
+                    });
+                    google.maps.event.addListener(marker, 'click', function() {
+                        if (lastSellerInfoWindow) lastSellerInfoWindow.close();
+                        infoWindow.open(searchResultsMap, marker);
+                        lastSellerInfoWindow = infoWindow;
+                    });
                 });
-                map.fitBounds(bounds);
+                searchResultsMap.fitBounds(bounds);
 
             });
         </script>
@@ -705,6 +738,7 @@
         <div data-role="page" id="view-seller-item-details-page">
             <form id="ro-seller-form1">
                 <div data-role="header" data-position="fixed">
+                    <h3>Seller Details</h3>
                 </div>   
                 
                 <!-- prompt for buyer address popup -->
