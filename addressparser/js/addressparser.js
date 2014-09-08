@@ -25,7 +25,7 @@ var AddressParser = {
 
 		this.log(false, '>>>>> freeText input: \n' + freeText);
 
-		// STEP 1 - make a copy of freeText and perform some data sanitizing
+		// make a copy of freeText and perform some data sanitizing
 		this.log(true, '>>>>> pre-process input.');
 		this.log(true, 'input length before pre-processing: ' + freeText.length);
 		this.log(true, 'trim input');
@@ -65,20 +65,34 @@ var AddressParser = {
 			}
 		}*/
 
-		// STEP 3 - look for the start and end time
-		this.log(true, '>>>>> look for start and end time');
+		// look for the address
+		this.log(true, '>>>>> search for address');
 
-		var amWordIndex = freeTextCopy.search(/\s[0-9]+(:)?[0-9]*AM/);	// space followed by the start time ending in AM, the hour is optionally followed by a semicolon and optionally followed by minutes after the hour
-		amWordIndex++;	// added 1 to index to exclude the leading space
-		this.log(true, 'found start time at pos ' + amWordIndex + 1);
-		this.log(true, freeTextCopy.substring(amWordIndex));
+		this.log(true, '>>>>> search for the start and end time');
+		var startTime = -1, endTime = -1;
+		var amTimeIndex = freeTextCopy.search(/\s[0-9]+(:)?[0-9]*AM/);	// space followed by the start time ending in AM, the hour is optionally followed by a semicolon and optionally followed by minutes after the hour
+		if (amTimeIndex > 0) {
+			amTimeIndex++;	// added 1 to index to exclude the leading space
+			this.log(true, 'found start time at pos ' + amTimeIndex);
+			startTime = freeTextCopy.substring(amTimeIndex, freeTextCopy.indexOf('AM', amTimeIndex)); 
+			this.log(true, 'found start time ' + startTime);
 
-return;
+			// in most cases, the end time "PM" should immediately follow the start time "AM", ie, just a few characters further ahead
+			var pmTimeIndex = freeTextCopy.search(/[0-9]+(:)?[0-9]*PM/);	// end time ending in PM (with leading space ignored), the hour is optionally followed by a semicolon and optionally followed by minutes after the hour
+			if (pmTimeIndex >=0 && (pmTimeIndex - amTimeIndex) <= 15) {	// "PM" index being 15 characters or less from "AM"
+				this.log(true, 'found end time at pos ' + pmTimeIndex);
+				endTime = freeTextCopy.substring(pmTimeIndex, freeTextCopy.indexOf('PM', pmTimeIndex));
+				this.log(true, 'found end time ' + endTime);
+
+			}
+		}
+
+		return;
 
 		for (var i=0; i<freeTextLength; i++) {
 
 			// look for the word "AM" (morning) and work backwards to get the start time
-			//var amWordIndex = freeTextCopy.
+			//var amTimeIndex = freeTextCopy.
 
 			var currChar = freeText.charAt(i);
 			if ( $.isNumeric(currChar) ) {
