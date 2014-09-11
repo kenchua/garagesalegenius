@@ -16,7 +16,11 @@
 // 8:00am to 3:00pm
 
 var AddressParser = {
-	parse: function(freeText) {
+    parse: function(freeText) { 
+        this.parseMethod1(freeText);
+    },
+
+	parseMethod1: function(freeText) {
 
 		var freeTextCopy;
 		var freeTextLength;
@@ -182,8 +186,8 @@ var AddressParser = {
                     this.log(true, '>>>>> search for the address before the date and time');
                     var addressSpace = freeTextCopy.substring(0, (dayOfWeekIndex > 0)? dayOfWeekIndex : monthIndex);
                     this.log(true, 'look for the address in this text:\n' + addressSpace);
-                    // assumption: the street number is all numeric followed by a single space
-                    var streetNumberIndex = addressSpace.search(/\s[0-9]+\s/);
+                    // assumption: the street number is all numeric followed by space(s)
+                    var streetNumberIndex = addressSpace.search(/\s[0-9]+(\s)+/);
                     this.log(true, 'possible street number found at pos ' + streetNumberIndex);
                 }
 			}
