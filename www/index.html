@@ -140,7 +140,7 @@
 
             <div role="main" class="ui-content">
                 <h2>Search for Garage Sales</h2>
-                
+                <hr class="style-two"/>                
                 <!--<h4>1. I am coming from: (choose one)</h4>-->
                 <h3>Enter your location or tap <img src="img/gmap-marker1.png" style="text-align:left; vertical-align:bottom; width:22px; height:35px;"> for your approximate location</h3>
                 <p></p>
@@ -532,7 +532,7 @@
 
                 var contentString = '<div id="infowindow-content">' + '<span class="infowindow-seller-address">Your approx. location:<hr/><b>' + geoLocationFormattedAddress + '</b></span>' + '</div>';
                 var infoWindow = new google.maps.InfoWindow({
-                    content: contentString
+
                 });
                 google.maps.event.addListener(marker, 'click', function() {
                     if (lastSellerInfoWindow) lastSellerInfoWindow.close();
@@ -543,7 +543,7 @@
                 console.log('Put sellers on map.');
                 $.each(sellersVO.sellers, function(i, row) {
                     var latlng = new google.maps.LatLng(row.latitude, row.longitude);
-                    var marker = makeGMapMarker(searchResultsMap, latlng, b2sDrivingDirectionsIcons.end, '');
+                        content: contentString          <hr/>                    var marker = makeGMapMarker(searchResultsMap, latlng, b2sDrivingDirectionsIcons.end, '');
                     bounds.extend(latlng);
 
                     var contentString = '<div id="infowindow-content">' + '<span class="infowindow-seller-address"><b>' + row.formatted_address + '</b></span>' + '<hr/>Starting: ' + row.start_time + '</div>';
@@ -606,7 +606,8 @@
                 </div> 
               
                 <div role="main" class="ui-content">
-                    <h3>Enter your Garage Sale details</h3>
+                    <h2>Enter your Garage Sale details</h2>
+                    <hr class="style-two"/> 
                         <div class="ui-field-contain">
                             <div>
                                 Email:<a href="#why-email-is-required" data-rel="popup">Info</a>
@@ -780,7 +781,9 @@
                 </div>
 
                 <div role="main" class="ui-content">
-                    <h3 id="ro_address"></h3>
+                    <h2 id="ro_address"></h2>
+                    <hr class="style-two"/> 
+
                     <h4 id="ro_start_time"></h4>
                     <div id="ro_message">Message from seller: </div>
                     <p></p>
@@ -1009,8 +1012,29 @@
                         console.log('Got the directions.');
 
                         console.log('Make the buyer and seller driving directions markers.');
-                        makeGMapMarker(b2sDirectionsMap, geolocationLatLng, b2sDrivingDirectionsIcons.start, "You");
-                        makeGMapMarker(b2sDirectionsMap, selectedSellerAddressLatLng, b2sDrivingDirectionsIcons.end, "Seller");
+                        console.log('Put buyer on map.');
+                        var buyerMarker = makeGMapMarker(b2sDirectionsMap, geolocationLatLng, b2sDrivingDirectionsIcons.start, "You");
+                        var contentString = '<div id="infowindow-content">' + '<span class="infowindow-seller-address">Your approx. location:<hr/><b>' + geoLocationFormattedAddress + '</b></span>' + '</div>';
+                        var infoWindow = new google.maps.InfoWindow({
+                            content: contentString
+                        });
+                        google.maps.event.addListener(buyerMarker, 'click', function() {
+                            if (lastSellerInfoWindow) lastSellerInfoWindow.close();
+                            infoWindow.open(b2sDirectionsMap, buyerMarker);
+                            lastSellerInfoWindow = infoWindow;
+                        });
+
+                        console.log('Put seller on map.');
+                        var sellerMarker = makeGMapMarker(b2sDirectionsMap, selectedSellerAddressLatLng, b2sDrivingDirectionsIcons.end, "Seller");
+                        var contentString = '<div id="infowindow-content">' + '<span class="infowindow-seller-address"><b>' + sellersVO.sellerDetail.formatted_address + '</b></span>' + '<hr/>Starting: ' + sellersVO.sellerDetail.start_time + '</div>';
+                        var infoWindow = new google.maps.InfoWindow({
+                            content: contentString
+                        });
+                        google.maps.event.addListener(sellerMarker, 'click', function() {
+                            if (lastSellerInfoWindow) lastSellerInfoWindow.close();
+                            infoWindow.open(b2sDirectionsMap, sellerMarker);
+                            lastSellerInfoWindow = infoWindow;
+                        });
                         
                         console.log('Display the map route.');
                         b2sDirectionsDisplay.setMap(b2sDirectionsMap);
