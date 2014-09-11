@@ -19,7 +19,7 @@
         <link rel="stylesheet" href="themes/sample.min.css" />
         <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
         -->
-
+        
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
         <script type="text/javascript" src="js/jquery-2.1.1.js"></script> 
         <script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
@@ -67,6 +67,8 @@
         REUSABLE OBJECTS BELOW
         ======================
         -->          
+        
+<!--
         <div data-role="panel" id="leftpanel1" data-position="left" data-display="reveal" data-theme="a">
 
             <h3>Left Panel: Reveal</h3>
@@ -74,7 +76,9 @@
             <p>To close, click off the panel, swipe left or right, hit the Esc key, or use the button below:</p>
             <a href="#demo-links" data-rel="close" class="ui-btn ui-shadow ui-corner-all ui-btn-a ui-icon-delete ui-btn-icon-left ui-btn-inline">Close panel</a>
 
-        </div><!-- /leftpanel1 -->
+        </div>
+-->
+
     
         
 
@@ -138,37 +142,30 @@
                 <h2>Search for Garage Sales</h2>
                 
                 <!--<h4>1. I am coming from: (choose one)</h4>-->
-                <h4>1. Enter your location or tap Get my location</h4>
+                <h3>Enter your location or tap <img src="img/gmap-marker1.png" style="text-align:left; vertical-align:bottom; width:22px; height:35px;"> for your approximate location</h3>
                 <p></p>
-                <div class="ui-grid-solo">
-                    <div class="ui-block-a">
-                        <input type="text" id="buyerlocation" name="buyerlocation" placeholder="Postal code, Zip code, Intersection or Address"/>
-                    </div>
-                    <div class="ui-block-a">
-                        <!--<input type="button" data-icon="location" value="Use my location" id="getmygeolocation"/>-->
-                        <a id="getmygeolocation" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">Get my location</a>
-                    </div>
-                </div>
+                <table>
+                    <tr>
+                        <td>
+                            <input type="text" id="buyerlocation" name="buyerlocation" placeholder="Postal code, Zip code, Intersection or Address" />
+                        </td>
+                        <td>
+                            <a id="getmygeolocation"><img src="img/gmap-marker2.svg" width="50px" height="50px"/></a>
+                        </td>
+                    </tr>
+                </table>
+                <!--<a id="getmygeolocation" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">Get my location</a>-->
+
                 <br/><br/>
 
-                <h4>2. Within how many kilometers from you?</h4>
+                <h3>Within how many kilometers from you?</h3>
                 <p></p>
-                <div class="ui-grid-solo">
-                    <div class="ui-block-a" style="width:80%;">
-                        <input type="range" name="searchradius" id="searchradius" data-track-theme="a" data-theme="a" min="1" max="20" value="1">
-                    </div>
-                </div>
+                <!--<input type="range" name="searchradius" id="searchradius" data-track-theme="a" data-theme="a" min="1" max="20" value="1" >-->
+                <input type="range" name="searchradius" id="searchradius" data-track-theme="a" data-theme="a" min="1" max="20" value="1" step="1">
                 <br/><br/>
                 
-                <h4>3. Search</h4>
-                <p></p>
-                <div class="ui-grid-solo">
-                    <div class="ui-block-a">
-                        <p></p>
-                        <!--<input type="button" data-icon="search" value="Search" id="searchaddress"/>-->
-                        <a id="searchaddress" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">Search</a>
-                    </div>
-                </div>
+                <!--<input type="button" data-icon="search" value="Search" id="searchaddress"/>-->
+                <a id="searchaddress" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">Search</a>
                 
             </div>
 
@@ -364,7 +361,7 @@
     			parseJSONP:function(result) {  
     				sellersVO.sellers = result;
                     
-                    console.log('# of sellers found: ' + sellersVO.sellers.length);
+                    console.log('number of sellers found: ' + sellersVO.sellers.length);
 
     				// show the results page
     				$(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-page', {
@@ -387,6 +384,9 @@
             </div>   
 
             <div role="main" class="ui-content">
+                <div id="nosellersfound" style="display:none;">
+                    <h3></h3>
+                </div>
                 <div class="listview-wrapper" data-iscroll>
                     <ul data-role="listview" id="address-list" data-inset="true" data-icon="false">
                     </ul>
@@ -408,8 +408,17 @@
             
             $(document).on('pagebeforeshow', '#address-search-results-page', function(){
                 console.log('pagebeforeshow on address-search-results-page triggered.');
+                $('#nosellersfound').hide();
+                $('#nosellersfound').html('');
+
                 // populate search results
-                $('#address-list').empty();        
+                $('#address-list').empty();
+                
+                console.log('number of sellers found: ' + sellersVO.sellers.length);
+                if (sellersVO.sellers.length == 0) {
+                    $('#nosellersfound').html('<h3>Sorry, no sellers found within ' + $('#searchradius').val() + ' kilometer(s) of your location!' );
+                    $('#nosellersfound').show();
+                }
                 $.each(sellersVO.sellers, function(i, row) {
 
                     // append the gui_selected attribute that we will use to store the user's selection of this address
@@ -419,7 +428,7 @@
                     // assemble the custom address row
                     var addressStaticGMapUrl = 'http://maps.googleapis.com/maps/api/staticmap?center=' + row.latitude + ',' + row.longitude + '&zoom=17&size=100x100&maptype=roadmap&markers=' + row.latitude + ',' + row.longitude;
 
-                    $('#address-list').append('<li><a href="" data-id="' + row.id + '">' + '<img src="' + addressStaticGMapUrl + '"/>'  + '<h3>' + row.formatted_address + '</h3><p>When:&nbsp;' + row.start_time + '&nbsp;-&nbsp;' + row.end_time + '</p><p style="color:green;">' + truncateDecimals(row.distance *1.60934, 2) + ' km(s) away</p></a></li>');
+                    $('#address-list').append('<li><a href="" data-id="' + row.id + '">' + '<img src="' + addressStaticGMapUrl + '"/>'  + '<h3>' + row.formatted_address + '</h3><p>When:&nbsp;' + row.start_time + '&nbsp;-&nbsp;' + row.end_time + '</p><p style="color:green;">Approx. ' + truncateDecimals(row.distance *1.60934, 2) + ' km(s) away</p></a></li>');
                 });
                 $('#address-list').listview('refresh');
                 $(".listview-wrapper").iscrollview("refresh");
@@ -517,6 +526,21 @@
                 });
 
                 var bounds = new google.maps.LatLngBounds();
+                console.log('Put buyer on map.');
+                var marker = makeGMapMarker(searchResultsMap, geolocationLatLng, b2sDrivingDirectionsIcons.start, '');
+                bounds.extend(geolocationLatLng);
+
+                var contentString = '<div id="infowindow-content">' + '<span class="infowindow-seller-address">Your approx. location:<hr/>' + geoLocationFormattedAddress + '</span>' + '</div>';
+                var infoWindow = new google.maps.InfoWindow({
+                    content: contentString
+                });
+                google.maps.event.addListener(marker, 'click', function() {
+                    if (lastSellerInfoWindow) lastSellerInfoWindow.close();
+                    infoWindow.open(searchResultsMap, marker);
+                    lastSellerInfoWindow = infoWindow;
+                });
+
+                console.log('Put sellers on map.');
                 $.each(sellersVO.sellers, function(i, row) {
                     var latlng = new google.maps.LatLng(row.latitude, row.longitude);
                     var marker = makeGMapMarker(searchResultsMap, latlng, b2sDrivingDirectionsIcons.end, '');
@@ -781,12 +805,14 @@
                 </div>
 
                 <!-- right panel menu -->
+<!--
                 <div class="panel right" data-role="panel" data-position="right" data-display="overlay" id="panel-02">
                     <ul>
                         <li><a href="#" title="John Doe"><span class="avatar"><img src="img/mambows_120.jpg" width="30" height="30"></span>John Doe</a></li>
                         <li><a href="#" title="Jessy Doe"><span class="avatar"><img src="img/mkalalang_120.jpg" width="30" height="30"></span>Jessy Doe</a></li>
                     </ul>
                 </div>
+-->
                 
                 <!--
                  <div data-role="footer" data-position="fixed" data-tap-toggle="false">
