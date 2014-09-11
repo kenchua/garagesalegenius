@@ -530,7 +530,7 @@
                 var marker = makeGMapMarker(searchResultsMap, geolocationLatLng, b2sDrivingDirectionsIcons.start, '');
                 bounds.extend(geolocationLatLng);
 
-                var contentString = '<div id="infowindow-content">' + '<span class="infowindow-seller-address">Your approx. location:<hr/>' + geoLocationFormattedAddress + '</span>' + '</div>';
+                var contentString = '<div id="infowindow-content">' + '<span class="infowindow-seller-address">Your approx. location:<hr/><b>' + geoLocationFormattedAddress + '</b></span>' + '</div>';
                 var infoWindow = new google.maps.InfoWindow({
                     content: contentString
                 });
@@ -546,7 +546,7 @@
                     var marker = makeGMapMarker(searchResultsMap, latlng, b2sDrivingDirectionsIcons.end, '');
                     bounds.extend(latlng);
 
-                    var contentString = '<div id="infowindow-content">' + '<span class="infowindow-seller-address">' + row.formatted_address + '</span>' + '<hr/>Starting: ' + row.start_time + '</div>';
+                    var contentString = '<div id="infowindow-content">' + '<span class="infowindow-seller-address"><b>' + row.formatted_address + '</b></span>' + '<hr/>Starting: ' + row.start_time + '</div>';
                     var infoWindow = new google.maps.InfoWindow({
                         content: contentString
                     });
@@ -1011,7 +1011,7 @@
                         console.log('Make the buyer and seller driving directions markers.');
                         makeGMapMarker(b2sDirectionsMap, geolocationLatLng, b2sDrivingDirectionsIcons.start, "You");
                         makeGMapMarker(b2sDirectionsMap, selectedSellerAddressLatLng, b2sDrivingDirectionsIcons.end, "Seller");
-
+                        
                         console.log('Display the map route.');
                         b2sDirectionsDisplay.setMap(b2sDirectionsMap);
                         b2sDirectionsDisplay.setDirections(response);
