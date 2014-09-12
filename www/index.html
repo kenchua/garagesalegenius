@@ -495,11 +495,8 @@
                 });
             });
             
-            $(document).on('click', '#mapview-footer', function() {
-                console.log('Map view requested for search results.');
-            });
-            
             $(document).on('pageshow', '#address-search-results-map-page',function(e,data) {   
+                console.log('Adjusting map div height.');
                 $('#search-results-map-div').height(getRealContentHeight());
                 // This is the minimum zoom level that we'll allow
                 var minZoomLevel = 12;
@@ -508,7 +505,7 @@
                     zoom: minZoomLevel,
                     center: new google.maps.LatLng(38.50, -90.50),
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
-                    panControl: true,
+                    panControl: false,
                     mapTypeControl: false,
                     panControlOptions: {
                         position: google.maps.ControlPosition.RIGHT_CENTER
@@ -543,7 +540,7 @@
                 console.log('Put sellers on map.');
                 $.each(sellersVO.sellers, function(i, row) {
                     var latlng = new google.maps.LatLng(row.latitude, row.longitude);
-                        content: contentString          <hr/>                    var marker = makeGMapMarker(searchResultsMap, latlng, b2sDrivingDirectionsIcons.end, '');
+                    var marker = makeGMapMarker(searchResultsMap, latlng, b2sDrivingDirectionsIcons.end, '');
                     bounds.extend(latlng);
 
                     var contentString = '<div id="infowindow-content">' + '<span class="infowindow-seller-address"><b>' + row.formatted_address + '</b></span>' + '<hr/>Starting: ' + row.start_time + '</div>';
@@ -799,8 +796,11 @@
                     <div id="ro_collectors_items" style="display:none;">Collector's Items&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
                     
                     <!-- buyer to seller directions -->
-                    <h3 id="directions-to-seller-header">Driving directions to Seller's address</h3>
-                    <a id="view-buyer-seller-directions-map" href="#buyer-seller-driving-directions-map-page" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">View Map</a>
+                    <div>
+                    <div style="float:left;border: 1px solid red;"><h3 id="directions-to-seller-header" style="display:inline;">Driving directions to Seller's address</h3></div>
+                    <div style="float:right;width:100%;text-align:right;border: 1px solid blue;"><a id="view-buyer-seller-directions-map" href="#buyer-seller-driving-directions-map-page" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">View Map</a></div>
+                    <div style="clear:both;">
+                    </div>
 
                     <div id="b2s-map-canvas" style="display:none;width:100%;height:400px;"></div>
                     <div id="b2s-directions-panel" style="width:100%;"></div>
