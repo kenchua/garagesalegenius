@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <!-- input styles http://callmenick.com/2014/04/22/various-css-input-text-styles/ -->
         <meta charset="utf-8" />
         <meta name="format-detection" content="telephone=no" />
         <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
@@ -22,6 +23,15 @@
         
         <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
         <script type="text/javascript" src="js/jquery-2.1.1.js"></script> 
+
+        <script>
+            // use this code in conjuction with data-enhance="false", to turn off styling for jQM elements
+            // this code must be present before jQM js is loaded
+            $(document).on('mobileinit', function () {
+                $.mobile.ignoreContentEnabled = true;
+            });
+        </script>
+
         <script type="text/javascript" src="js/jquery.mobile-1.4.3.min.js"></script>
         <script type="text/javascript" src="js/jquery.validate.min.js"></script> 
         <script type="text/javascript" src="js/iscroll.js"></script> 
@@ -29,6 +39,8 @@
         <script type="text/javascript" src="js/jquery.loadJSON.js"></script> 
         <script type="text/javascript" src="cordova.js"></script>
         <script type="text/javascript" src="js/gsgenius.js"></script>
+
+
 
         <script>
             /*
@@ -52,6 +64,7 @@
                         console.log('Ajax call ended');
                         }    
                 });
+
             });
         </script>
     </head>
@@ -144,13 +157,15 @@
                 <!--<h4>1. I am coming from: (choose one)</h4>-->
                 <h3>Enter your location or tap <img src="img/gmap-marker1.png" style="text-align:left; vertical-align:bottom; width:22px; height:35px;"> for your approximate location</h3>
                 <p></p>
-                <table>
+                <table border="0">
                     <tr>
                         <td>
-                            <input type="text" id="buyerlocation" name="buyerlocation" placeholder="Postal code, Zip code, Intersection or Address" />
+                            <div data-enhance="false" class="style-4">
+                            <input class="text-input" type="text" id="buyerlocation" name="buyerlocation" placeholder="Postal code, Zip code, Intersection or Address" />
+                            </div>
                         </td>
                         <td>
-                            <a id="getmygeolocation"><img src="img/gmap-marker2.svg" width="50px" height="50px"/></a>
+                            <a id="getmygeolocation"><img style="padding-left:16px;" src="img/gmap-marker2.svg" width="50px" height="50px"/></a>
                         </td>
                     </tr>
                 </table>
@@ -161,11 +176,12 @@
                 <h3>Within how many kilometers from you?</h3>
                 <p></p>
                 <!--<input type="range" name="searchradius" id="searchradius" data-track-theme="a" data-theme="a" min="1" max="20" value="1" >-->
-                <input type="range" name="searchradius" id="searchradius" data-track-theme="a" data-theme="a" min="1" max="20" value="1" step="1">
+                <input type="range" name="searchradius" id="searchradius" data-track-theme="a" data-highlight="true" data-mini="true" data-theme="a" min="1" max="20" value="1" step="1" defaultValue="1">
                 <br/><br/>
                 
                 <!--<input type="button" data-icon="search" value="Search" id="searchaddress"/>-->
-                <a id="searchaddress" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">Search</a>
+                <!-- <a id="searchaddress" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-search ui-btn-icon-left ui-btn-a">Search</a> -->
+                <button id="searchaddress" data-enhance="false">Search</button>
                 
             </div>
 
@@ -181,16 +197,14 @@
             var geoLocationFormattedAddress;
             var searchRadius;
 
-            $(document).on('pagebeforeshow', '#address-search-criteria-page', function(){ 
-                console.log('Initialize address search criteria page.');
+    		$(document).on('pagebeforeshow', '#address-search-criteria-page', function(){      
+                console.log('pagebeforeshow on address-search-criteria-page triggered.');
+
                 geolocationLatLng = null;
                 geoLocationFormattedAddress = null;
                 $('#buyerlocation').val('');
                 $('#searchradius').val(1);
-            });    
-
-    		$(document).on('pagebeforeshow', '#address-search-criteria-page', function(){      
-                console.log('pagebeforeshow on address-search-criteria-page triggered.');
+                $('#searchradius').change();
 
     			$(document).on('click', '#getmygeolocation', function(){
 
@@ -226,13 +240,15 @@
                             } else {
                                 $('#ajax-modal-popup-address-search').popup("close");
                                 console.log('Geocoding failed.  Search aborted.');
-                                alert('Search failed.  Please verify you entered a valid location or check your internet connection.');
+                                //alert('Search failed.  Please verify you entered a valid location or check your internet connection.');
+                                console.log('Start showing device notification.');
                                 navigator.notification.alert(
                                     "Search failed.  Please verify you entered a valid location or check your internet connection.",
                                     geoCodeBuyerLocationAlertDismissed, // callback
                                     'Search',
                                     'OK'
                                 );
+                                console.log('End showing device notification.');
                             }
                         });                        
                     } else {
@@ -261,13 +277,15 @@
                             } else {
                                 $('#ajax-modal-popup-address-search').popup("close");
                                 console.log('Geocoding failed.  Search aborted.');
-                                alert('Search failed.  Please verify you entered a valid location or check your internet connection.');
+                                //alert('Search failed.  Please verify you entered a valid location or check your internet connection.');
+                                console.log('Start showing device notification.');
                                 navigator.notification.alert(
                                     "Search failed.  Please verify you entered a valid location or check your internet connection.",
                                     geoCodeBuyerLocationAlertDismissed, // callback
                                     'Search',
                                     'OK'
                                 );
+                                console.log('End showing device notification.');
                             }
                         }); 
                     }
@@ -311,13 +329,15 @@
             function geoCodeBuyerLocationError(error) {
                 $('#ajax-modal-popup-address-search').popup("close");
                 console.log('Buyer geolocation not found. error.code=' + error.code + ' error.message=' + error.message);
-                alert('Oops!  Unable to find your location.');
-/*                navigator.notification.alert(
+                //alert('Oops!  Unable to find your location.');
+                console.log('Start showing device notification.');
+                navigator.notification.alert(
                     "Oops!  Unable to find your location.",
                     geoCodeBuyerLocationAlertDismissed, // callback
                     'Your Location',
                     'OK'
-                );*/
+                );
+                console.log('End showing device notification.');
             }
 
             function geoCodeBuyerLocationAlertDismissed() {
@@ -342,13 +362,15 @@
                         ajax.parseJSONP(result);
                     },
                     error: function (request,error) {
-                        alert('Search failed.  Please check your internet connection.');
-/*                        navigator.notification.alert(
+                        //alert('Search failed.  Please check your internet connection.');
+                        console.log('Start showing device notification.');
+                        navigator.notification.alert(
                             "Can't seem to reach our servers.  Please check your internet connection.",
                             geoCodeBuyerLocationAlertDismissed, // callback
                             'Search',
                             'OK'
-                        );*/
+                        );
+                        console.log('End showing device notification.');
                     }
                 }); 
             }
@@ -779,9 +801,9 @@
 
                 <div role="main" class="ui-content">
                     <h2 id="ro_address"></h2>
+                    <h4 id="ro_start_time"></h4>
                     <hr class="style-two"/> 
 
-                    <h4 id="ro_start_time"></h4>
                     <div id="ro_message">Message from seller: </div>
                     <p></p>
 
@@ -796,11 +818,12 @@
                     <div id="ro_collectors_items" style="display:none;">Collector's Items&nbsp;<img src="img/checkmark1.png" width="36px" height="36px"/></div>
                     
                     <!-- buyer to seller directions -->
-                    <div>
-                    <div style="float:left;border: 1px solid red;"><h3 id="directions-to-seller-header" style="display:inline;">Driving directions to Seller's address</h3></div>
-                    <div style="float:right;width:100%;text-align:right;border: 1px solid blue;"><a id="view-buyer-seller-directions-map" href="#buyer-seller-driving-directions-map-page" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-check ui-btn-icon-left ui-btn-a">View Map</a></div>
-                    <div style="clear:both;">
-                    </div>
+
+                    <!-- <a id="view-buyer-seller-directions-map" href="#buyer-seller-driving-directions-map-page" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-map ui-btn-icon-left ui-btn-a">View Map</a>
+                    -->
+                    <button id="view-buyer-seller-directions-map" data-enhance="false" style="margin-top:4px;margin-bottom:4px;">View Map</button>
+
+                    <div><h3 id="directions-to-seller-header">Driving directions to Seller's address</h3></div>
 
                     <div id="b2s-map-canvas" style="display:none;width:100%;height:400px;"></div>
                     <div id="b2s-directions-panel" style="width:100%;"></div>
@@ -838,6 +861,14 @@
                 start: new google.maps.MarkerImage('img/mapicon-buyer.png'),
                 end: new google.maps.MarkerImage('img/mapicon-home.png')
             };
+
+            $(document).on('vclick', '#view-buyer-seller-directions-map', function(){ 
+                console.log('Map view of seller location requested.');
+                // show the seller location on the map
+                $(':mobile-pagecontainer').pagecontainer('change', '#buyer-seller-driving-directions-map-page', {
+                    reload: false
+                });
+            });
 
             $(document).on('pageshow', '#view-seller-item-details-page',function(e,data) {
                 // set and display the seller's detail info

@@ -36,6 +36,70 @@ hr.style-two {
     background-image:      -o-linear-gradient(left, rgba(0,0,0,0), rgba(0,0,0,0.75), rgba(0,0,0,0)); 
 }
 
+input[type="text"] {
+    display: block;
+    margin: 0;
+    width: 100%;
+    font-family: sans-serif;
+    font-size: 18px;
+    appearance: none;
+    box-shadow: none;
+    border-radius: none;
+}
+
+input[type="text"]:focus {
+    outline: none;
+}
+
+.style-1 input[type="text"] {
+    padding: 10px;
+    border: solid 1px #dcdcdc;
+    transition: box-shadow 0.3s, border 0.3s;
+}
+.style-1 input[type="text"]:focus,
+.style-1 input[type="text"].focus {
+    border: solid 1px #707070;
+    box-shadow: 0 0 5px 1px #969696;
+}
+.style-4 input[type="text"] {
+    padding: 10px;
+    border: none;
+    border-bottom: solid 2px #c9c9c9;
+    transition: border 0.3s;
+}
+.style-4 input[type="text"]:focus,
+.style-4 input[type="text"].focus {
+    border-bottom: solid 2px #0099cc; /*#00ddff; #969696;*/
+}
+
+button {
+    display: inline-block;
+    margin: 0 10px 0 0;
+    padding: 10px 20px;
+    line-height: 1.8;
+    appearance: none;
+    box-shadow: none;
+    border-radius: 0;
+}
+button:focus {
+    outline: none
+}
+button {
+    color: #fff;
+    background-color: #6496c8;
+    text-shadow: -1px 1px #417cb8;
+    border: none;
+}
+button:hover,
+button.hover {
+    background-color: #346392;
+    text-shadow: -1px 1px #27496d;
+}
+button:active,
+button.active {
+    background-color: #27496d;
+    text-shadow: -1px 1px #193047;
+}
 input[type='range'] {
     -webkit-appearance: none;
     border-radius: 5px;
