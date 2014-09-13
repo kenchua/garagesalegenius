@@ -144,10 +144,16 @@
             </div>   
 
              <!-- ajax loading busy indicator popup -->
-            <div data-role="popup" id="ajax-modal-popup-address-search" class="ui-corner-all" data-dismissible="false" style="text-align:center; width:200px; height:70px;">
-                <div class="box300 border" style="padding:10px;">
+            <div data-role="popup" id="ajax-modal-popup-address-search" class="ui-corner-none" data-dismissible="false" style="text-align:center; width:240px; height:70px; background-color: #747D7D;">
+                <!-- image and text aligned
+                <div style="padding:10px;">
                     <img src="img/ajax-loader.gif" style="text-align:left; vertical-align:middle;">
                     Processing
+                </div>
+                -->
+                <div style="padding:10px; align:left;">
+                    <img src="img/ajax-loader.gif" style="text-align:left; vertical-align:middle;"/>
+                    <!--Processing-->
                 </div>
             </div> 
 
@@ -155,7 +161,7 @@
                 <h2>Search for Garage Sales</h2>
                 <hr class="style-two"/>                
                 <!--<h4>1. I am coming from: (choose one)</h4>-->
-                <h3>Enter your location or tap <img src="img/gmap-marker1.png" style="text-align:left; vertical-align:bottom; width:22px; height:35px;"> for your approximate location</h3>
+                <h3>Enter your location or tap <img src="img/gmap-marker1.png" style="text-align:left; vertical-align:bottom; width:22px; height:35px;"/> for your approximate location</h3>
                 <p></p>
                 <table border="0">
                     <tr>
@@ -995,7 +1001,7 @@
         <script>
             var b2sDirectionsMap;
 
-            $(document).on('pageshow', '#buyer-seller-driving-directions-map-page',function(e,data) {   
+            $(document).on('pagebeforeshow', '#buyer-seller-driving-directions-map-page',function(e,data) {   
                 $('#buyer-seller-driving-directions-map-div').height(getRealContentHeight());
 
                 /*
