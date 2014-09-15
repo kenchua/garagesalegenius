@@ -433,7 +433,14 @@
                     reload: false
                 });
             });
-            
+ 
+            $(document).on('pagehide', '#address-search-results-page', function(event){ 
+                console.log('pagehide on address-search-results-page triggered.');
+                var page = event.target;
+                page.remove();
+                console.log('Removed page address-search-results-page from history.');
+            });
+                       
             $(document).on('pagebeforeshow', '#address-search-results-page', function(){
                 console.log('pagebeforeshow on address-search-results-page triggered.');
                 $('#nosellersfound').hide();
@@ -522,7 +529,14 @@
                     reload: false
                 });
             });
-            
+ 
+            $(document).on('pagehide', '#address-search-results-map-page', function(event){ 
+                console.log('pagehide on address-search-results-map-page triggered.');
+                var page = event.target;
+                page.remove();
+                console.log('Removed page address-search-results-map-page from history.');
+            });
+
             $(document).on('pageshow', '#address-search-results-map-page',function(e,data) {   
                 console.log('Adjusting map div height.');
                 $('#search-results-map-div').height(getRealContentHeight());
@@ -825,9 +839,9 @@
                     
                     <!-- buyer to seller directions -->
 
-                    <!-- <a id="view-buyer-seller-directions-map" href="#buyer-seller-driving-directions-map-page" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-map ui-btn-icon-left ui-btn-a">View Map</a>
-                    -->
-                    <button id="view-buyer-seller-directions-map" data-enhance="false" style="margin-top:4px;margin-bottom:4px;">View Map</button>
+                    <a id="view-buyer-seller-directions-map" href="#buyer-seller-driving-directions-map-page" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-map ui-btn-icon-left ui-btn-a">View Map</a>
+                   
+                    <!-- <button id="view-buyer-seller-directions-map" data-enhance="false" style="margin-top:4px;margin-bottom:4px;">View Map</button> -->
 
                     <div><h3 id="directions-to-seller-header">Driving directions to Seller's address</h3></div>
 
@@ -875,6 +889,15 @@
                     reload: false
                 });
             });
+
+            /* we shouldn't remove this page from history,to allow the user to return to the search results page
+            $(document).on('pagehide', '#view-seller-item-details-page', function(event){ 
+                console.log('pagehide on view-seller-item-details-page triggered.');
+                var page = event.target;
+                page.remove();
+                console.log('Removed page view-seller-item-details-page from history.');
+            });
+            */
 
             $(document).on('pageshow', '#view-seller-item-details-page',function(e,data) {
                 // set and display the seller's detail info
@@ -1001,7 +1024,7 @@
         <script>
             var b2sDirectionsMap;
 
-            $(document).on('pagebeforeshow', '#buyer-seller-driving-directions-map-page',function(e,data) {   
+            $(document).on('pageshow', '#buyer-seller-driving-directions-map-page',function(e,data) {   
                 $('#buyer-seller-driving-directions-map-div').height(getRealContentHeight());
 
                 /*
@@ -1011,9 +1034,16 @@
                 $('#b2s-driving-directions-map-canvas').append(mapNode);
                 */
 
+                $(document).on('pagehide', '#buyer-seller-driving-directions-map-page', function(event){ 
+                    console.log('pagehide on buyer-seller-driving-directions-map-page triggered.');
+                    var page = event.target;
+                    page.remove();
+                    console.log('Removed page buyer-seller-driving-directions-map-page from history.');
+                });
+
                 console.log('Creating buyer to seller driving directions map.');
                 b2sDirectionsMap = new google.maps.Map(document.getElementById('b2s-driving-directions-map-canvas'), {
-                    zoom: 15,
+                    zoom: 12,
                     center: selectedSellerAddressLatLng,
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     panControl: false,
