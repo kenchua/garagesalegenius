@@ -86,7 +86,7 @@ button:focus {
 }
 button {
     color: #fff;
-    background-color: #6496c8;
+    background-color: #0099cc; /*#6496c8;*/
     text-shadow: -1px 1px #417cb8;
     border: none;
 }

@@ -433,13 +433,6 @@
                     reload: false
                 });
             });
- 
-            $(document).on('pagehide', '#address-search-results-page', function(event){ 
-                console.log('pagehide on address-search-results-page triggered.');
-                var page = event.target;
-                page.remove();
-                console.log('Removed page address-search-results-page from history.');
-            });
                        
             $(document).on('pagebeforeshow', '#address-search-results-page', function(){
                 console.log('pagebeforeshow on address-search-results-page triggered.');
@@ -595,8 +588,12 @@
                         lastSellerInfoWindow = infoWindow;
                     });
                 });
-                searchResultsMap.fitBounds(bounds);
-
+                google.maps.event.addListenerOnce(searchResultsMap, 'bounds_changed', function(event) {
+                    if (this.getZoom() > 15) {
+                        this.setZoom(15);
+                    }
+                });
+                searchResultsMap.fitBounds(bounds); //async
             });
         </script>
         <!-- END PAGE: Address search results in map -->
@@ -890,14 +887,12 @@
                 });
             });
 
-            /* we shouldn't remove this page from history,to allow the user to return to the search results page
             $(document).on('pagehide', '#view-seller-item-details-page', function(event){ 
                 console.log('pagehide on view-seller-item-details-page triggered.');
                 var page = event.target;
                 page.remove();
                 console.log('Removed page view-seller-item-details-page from history.');
             });
-            */
 
             $(document).on('pageshow', '#view-seller-item-details-page',function(e,data) {
                 // set and display the seller's detail info
