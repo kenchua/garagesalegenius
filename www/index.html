@@ -65,6 +65,29 @@
                         }    
                 });
 
+                $(document).on('pagecontainershow', function(e, ui) {
+                    /*
+                    console.log('Switched page from ' + ui.prevPage.attr('id') + ' to ' + ui.toPage.attr('id'));
+                    console.log('History stack: ' + $.mobile.navigate.history.stack);
+                    console.log('History stack length: ' + $.mobile.navigate.history.stack.length);                    
+                    console.log("Current url:" + $.mobile.navigate.history.getActive().url);
+                    console.log("Stack: (active index = " + $.mobile.navigate.history.activeIndex + "  previous index: " + $.mobile.navigate.history.previousIndex + " )");
+
+                    console.log('History stack: ' + $.mobile.navigate.history.stack);
+                    $.each($.mobile.navigate.history.stack, function (index, val) {
+                        console.log(index + "-" + val.url);
+                    });
+                    */
+                });
+
+                $(document).on('pagebeforechange', function(e, ob) {
+                    /*
+                    console.log('ob.toPage = ' + ob.toPage);
+                    if (ob.toPage && (typeof ob.toPage==="string") && ob.toPage.indexOf('address-search-results-map-page') >= 0) {
+                        //e.preventDefault();
+                    }
+                    */
+                });
             });
         </script>
     </head>
@@ -167,7 +190,7 @@
                     <tr>
                         <td>
                             <div data-enhance="false" class="style-4">
-                            <input class="text-input" type="text" id="buyerlocation" name="buyerlocation" placeholder="Postal code, Zip code, Intersection or Address" />
+                            <input class="text-input" type="text" id="buyerlocation" name="buyerlocation" placeholder="Postal code, Zip code, Intersection or Address"/>
                             </div>
                         </td>
                         <td>
@@ -430,7 +453,8 @@
                 console.log('Map view of results requested.');
                 // show the search results on the map
                 $(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-map-page', {
-                    reload: false
+                    reload: false,
+                    changeHash: false
                 });
             });
                        
@@ -519,15 +543,18 @@
                 console.log('List view of results requested.');
                 // show the search results page
                 $(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-page', {
-                    reload: false
+                    reload: false,
+                    changeHash: false
                 });
             });
  
             $(document).on('pagehide', '#address-search-results-map-page', function(event){ 
                 console.log('pagehide on address-search-results-map-page triggered.');
+                /*
                 var page = event.target;
-                page.remove();
+                page.remove();  //removes page from DOM
                 console.log('Removed page address-search-results-map-page from history.');
+                */
             });
 
             $(document).on('pageshow', '#address-search-results-map-page',function(e,data) {   
@@ -648,15 +675,21 @@
                             <div>
                                 Email:<a href="#why-email-is-required" data-rel="popup">Info</a>
                             </div>
-                            <input type="email" name="email" id="email" placeholder="Enter your email"/>
+                            <div data-enhance="false" class="style-4">
+                                <input type="email" name="email" id="email" placeholder="Enter your email"/>
+                            </div>
                         </div>
                         <div class="ui-field-contain">
                             <label for="address">Address:</label>
-                            <input type="text" id="address" name="address" placeholder="Enter your address"/>
+                            <div data-enhance="false" class="style-4">
+                                <input type="text" id="address" name="address" placeholder="Enter your address"/>
+                            </div>
                         </div>
                         <div class="ui-field-contain">
                             <label for="starttime">Start Time:</label>
-                            <input type="text" id="starttime" name="starttime" placeholder="Enter Start Time"/>
+                            <div data-enhance="false" class="style-4">
+                                <input type="text" id="starttime" name="starttime" placeholder="Enter Start Time"/>
+                            </div>
                         </div>
                         <div class="ui-field-contain">
                             <fieldset data-role="controlgroup">
@@ -889,9 +922,6 @@
 
             $(document).on('pagehide', '#view-seller-item-details-page', function(event){ 
                 console.log('pagehide on view-seller-item-details-page triggered.');
-                var page = event.target;
-                page.remove();
-                console.log('Removed page view-seller-item-details-page from history.');
             });
 
             $(document).on('pageshow', '#view-seller-item-details-page',function(e,data) {
@@ -1031,9 +1061,6 @@
 
                 $(document).on('pagehide', '#buyer-seller-driving-directions-map-page', function(event){ 
                     console.log('pagehide on buyer-seller-driving-directions-map-page triggered.');
-                    var page = event.target;
-                    page.remove();
-                    console.log('Removed page buyer-seller-driving-directions-map-page from history.');
                 });
 
                 console.log('Creating buyer to seller driving directions map.');
