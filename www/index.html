@@ -131,17 +131,13 @@
             </div>   
 
             <div role="main" class="ui-content">
-                <div class="ui-grid-a">
-                    <div class="ui-block-a">
-                        <a href="#address-search-criteria-page" data-transition="slide"  class="ui-btn" data-inline="false">
-                            <img src="img/buy1.png" alt="buy" width="200px" height="200px" />
-                        </a>
-                    </div>
-                    <div class="ui-block-b">
-                        <a href="#enter-seller-item-details-page" data-transition="slide"  class="ui-btn" data-inline="false">
-                            <img src="img/buy1.png" alt="sell" width="200px" height="200px" />
-                        </a>
-                    </div>
+                <div style='margin-top:10px;text-align:center;'>
+                    LOGO                                                             
+                </div>
+
+                <div style='margin-top:10px;text-align:center;'>
+                    <button id="buyer-start" data-enhance="false">Buyer</button>
+                    <button id="seller-start" data-enhance="false">Seller</button>
                 </div>
             </div>
 
@@ -149,6 +145,20 @@
                 <h3>Footer</h3>
             </div>    
         </div> 
+        <script type="text/javascript">
+            $(document).on('vclick', '#buyer-start', function(){ 
+                console.log('Start buyer activity.');
+                $(':mobile-pagecontainer').pagecontainer('change', '#address-search-criteria-page', {
+                    reload: false
+                });
+            });
+            $(document).on('vclick', '#seller-start', function(){ 
+                console.log('Start seller activity.');
+                $(':mobile-pagecontainer').pagecontainer('change', '#enter-seller-item-details-page', {
+                    reload: false
+                });
+            });
+        </script>
         <!-- END PAGE: Select Buy or Sell -->
         
         

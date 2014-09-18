@@ -101,12 +101,12 @@ button {
 }
 button:hover,
 button.hover {
-    background-color: #346392;
+    background-color: #007AA3; /*#346392;*/
     text-shadow: -1px 1px #27496d;
 }
 button:active,
 button.active {
-    background-color: #27496d;
+    background-color: #006B8F; /*#27496d;*/
     text-shadow: -1px 1px #193047;
 }
 input[type='range'] {
