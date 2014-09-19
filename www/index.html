@@ -126,32 +126,34 @@
                 
         <!-- BEGIN PAGE: Select Buy or Sell -->
         <div data-role="page" id="select-buy-or-sell-page">
-            <div data-role="header" data-position="fixed">
-                <h1>gsgenius</h1>
-            </div>   
 
-            <div role="main" class="ui-content">
-                <div style='margin-top:10px;text-align:center;'>
-                    LOGO                                                             
-                </div>
-
-                <div style='margin-top:10px;text-align:center;'>
+            <div id="main-page-div" data-role="content" style='padding:0px;background-size: 100% 100%;padding:0px;position:relative;background-image: url("http://i2.cdn.turner.com/cnn/dam/assets/140917111005-6-beluga-birthday-airbus-horizontal-gallery.jpg");
+        background-repeat:no-repeat;'>
+                <div style='position:absolute;z-index:10;bottom:0;width:100%;margin-bottom:50px;text-align:center;'>
                     <button id="buyer-start" data-enhance="false">Buyer</button>
                     <button id="seller-start" data-enhance="false">Seller</button>
-                </div>
+                </div>                                                           
+
             </div>
 
-            <div data-role="footer" data-position="fixed" data-tap-toggle="false">
-                <h3>Footer</h3>
-            </div>    
         </div> 
         <script type="text/javascript">
+            $(document).on('pagebeforeshow', '#select-buy-or-sell-page',function(e,data) {  
+                var mainPageContentHeight = getRealContentHeight();
+                console.log('Main page content div height: ' + mainPageContentHeight);
+                $('#main-page-div').height(mainPageContentHeight);
+                //$('#main-page-image-div').height(mainPageContentHeight);
+                $('#main-page-div').css('height', mainPageContentHeight);
+
+            });
+
             $(document).on('vclick', '#buyer-start', function(){ 
                 console.log('Start buyer activity.');
                 $(':mobile-pagecontainer').pagecontainer('change', '#address-search-criteria-page', {
                     reload: false
                 });
             });
+
             $(document).on('vclick', '#seller-start', function(){ 
                 console.log('Start seller activity.');
                 $(':mobile-pagecontainer').pagecontainer('change', '#enter-seller-item-details-page', {
