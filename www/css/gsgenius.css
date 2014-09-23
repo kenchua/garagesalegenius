@@ -81,6 +81,7 @@ input[type="text"]:focus {
 .style-4 input[type="email"].focus {
     border-bottom: solid 2px #0099cc; /*#00ddff; #969696;*/
 }
+
 button {
     display: inline-block;
     margin: 0 10px 0 0;
@@ -109,6 +110,36 @@ button.active {
     background-color: #006B8F; /*#27496d;*/
     text-shadow: -1px 1px #193047;
 }
+
+#bheader button {
+    display: inline-block;
+    margin: 0 10px 0 0;
+    padding: 10px 20px;
+    line-height: 1.8;
+    appearance: none;
+    box-shadow: none;
+    border-radius: 0;
+}
+#bheader button:focus {
+    outline: none
+}
+#bheader button {
+    color: #fff;
+    background-color: #0099cc; /*#6496c8;*/
+    text-shadow: -1px 1px #417cb8;
+    border: 1px solid red;
+}
+#bheader button:hover,
+#bheader button.hover {
+    background-color: #007AA3; /*#346392;*/
+    text-shadow: -1px 1px #27496d;
+}
+#bheader button:active,
+#bheader button.active {
+    background-color: #006B8F; /*#27496d;*/
+    text-shadow: -1px 1px #193047;
+}
+
 input[type='range'] {
     -webkit-appearance: none;
     border-radius: 5px;

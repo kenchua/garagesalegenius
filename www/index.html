@@ -147,14 +147,14 @@
 
             });
 
-            $(document).on('vclick', '#buyer-start', function(){ 
+            $(document).on('tap', '#buyer-start', function(){ 
                 console.log('Start buyer activity.');
                 $(':mobile-pagecontainer').pagecontainer('change', '#address-search-criteria-page', {
                     reload: false
                 });
             });
 
-            $(document).on('vclick', '#seller-start', function(){ 
+            $(document).on('tap', '#seller-start', function(){ 
                 console.log('Start seller activity.');
                 $(':mobile-pagecontainer').pagecontainer('change', '#enter-seller-item-details-page', {
                     reload: false
@@ -461,7 +461,7 @@
             </div>    
         </div> 
         <script type="text/javascript">
-            $(document).on('vclick', '#mapview-results', function(){ 
+            $(document).on('tap', '#mapview-results', function(){ 
                 console.log('Map view of results requested.');
                 // show the search results on the map
                 $(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-map-page', {
@@ -497,30 +497,34 @@
                 $('#address-list').listview('refresh');
                 $(".listview-wrapper").iscrollview("refresh");
 
-                // click on a search item result
-                $(document).on('vclick', '#address-list li a', function(){  
-                    sellersVO.id = $(this).attr('data-id');
 
-                    $.each(sellersVO.sellers, function(i, row) {
-                        // toggle select/deselect address
-                        if (row.id == sellersVO.id) {
-                            sellersVO.sellerDetail = row;   // keep a reference to the selected address
-                            if (row.gui_selected) {
-                                row.gui_selected = false;
-                                console.log("Deselected " + row.formatted_address);
-                            } else {
-                                row.gui_selected = true;
-                                console.log("Selected " + row.formatted_address);
-                            }
-                            return false;   // exit loop                            
+            });
+
+            // click on a search item result
+            $(document).on('tap', '#address-list li a', function(){  
+                sellersVO.id = $(this).attr('data-id');
+
+                $.each(sellersVO.sellers, function(i, row) {
+                    console.log('Tapped seller id ' + sellersVO.id);
+                    // toggle select/deselect address
+                    if (row.id == sellersVO.id) {
+                        sellersVO.sellerDetail = row;   // keep a reference to the selected address
+                        if (row.gui_selected) {
+                            row.gui_selected = false;
+                            console.log("Deselected " + row.formatted_address);
+                        } else {
+                            row.gui_selected = true;
+                            console.log("Selected " + row.formatted_address);
                         }
+                        return false;   // exit loop                            
+                    }
 
-                    });
+                });
 
-                    //$(this).attr('data-theme','a').trigger('refresh');
-                    $(':mobile-pagecontainer').pagecontainer('change', '#view-seller-item-details-page', {
-                        reload: false
-                    });
+                //$(this).attr('data-theme','a').trigger('refresh');
+                console.log('Change page to view-seller-item-details-page');
+                $(':mobile-pagecontainer').pagecontainer('change', '#view-seller-item-details-page', {
+                    reload: false
                 });
             });
         </script>
@@ -551,7 +555,7 @@
         <script>
             var lastSellerInfoWindow;
             
-            $(document).on('vclick', '#listview-results', function(){ 
+            $(document).on('tap', '#listview-results', function(){ 
                 console.log('List view of results requested.');
                 // show the search results page
                 $(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-page', {
@@ -683,24 +687,25 @@
                 <div role="main" class="ui-content">
                     <h2>Enter your Garage Sale details</h2>
                     <hr class="style-two"/> 
-                        <div class="ui-field-contain">
+
+
+
                             <div>
                                 Email:<a href="#why-email-is-required" data-rel="popup">Info</a>
                             </div>
                             <div data-enhance="false" class="style-4">
-                                <input type="email" name="email" id="email" placeholder="Enter your email"/>
+                                <input class="text-input" type="email" name="email" id="email" placeholder="Enter your email"/>
                             </div>
-                        </div>
                         <div class="ui-field-contain">
                             <label for="address">Address:</label>
                             <div data-enhance="false" class="style-4">
-                                <input type="text" id="address" name="address" placeholder="Enter your address"/>
+                                <input class="text-input" type="text" id="address" name="address" placeholder="Enter your address"/>
                             </div>
                         </div>
                         <div class="ui-field-contain">
                             <label for="starttime">Start Time:</label>
                             <div data-enhance="false" class="style-4">
-                                <input type="text" id="starttime" name="starttime" placeholder="Enter Start Time"/>
+                                <input type="text" id="starttime" name="starttime" placeholder="Tap to enter"/>
                             </div>
                         </div>
                         <div class="ui-field-contain">
@@ -746,6 +751,23 @@
         </div> 
 
         <script>
+
+
+            $("#starttime").focus(function() {
+                var options = {
+                    date: new Date(),
+                    mode: 'date'
+                };
+
+                datePicker.show(options, function(date) {
+                    alert("date result " + date);  
+                });
+            });
+
+            $(document).on('pagebeforeshow', '#enter-seller-item-details-page',function(e,data) {  
+                $("#starttime").prop("readonly",true);
+            });
+
             $('#seller-form1').validate({
                 rules: {
                     address: {
@@ -881,14 +903,15 @@
                     
                     <!-- buyer to seller directions -->
 
-                    <a id="view-buyer-seller-directions-map" href="#buyer-seller-driving-directions-map-page" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-map ui-btn-icon-left ui-btn-a">View Map</a>
-                   
+                    <!-- <a id="view-buyer-seller-directions-map" href="#buyer-seller-driving-directions-map-page" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-icon-map ui-btn-icon-left ui-btn-a">View Map</a> -->
                     <!-- <button id="view-buyer-seller-directions-map" data-enhance="false" style="margin-top:4px;margin-bottom:4px;">View Map</button> -->
 
                     <div><h3 id="directions-to-seller-header">Driving directions to Seller's address</h3></div>
 
                     <div id="b2s-map-canvas" style="display:none;width:100%;height:400px;"></div>
                     <div id="b2s-directions-panel" style="width:100%;"></div>
+
+                    <button id="view-buyer-seller-directions-map" data-enhance="false">View Map</button>
                     
                 </div>
 
@@ -924,9 +947,15 @@
                 end: new google.maps.MarkerImage('img/mapicon-home.png')
             };
 
-            $(document).on('vclick', '#view-buyer-seller-directions-map', function(){ 
+            $(document).on('tap', '#view-buyer-seller-directions-map', function(){ 
                 console.log('Map view of seller location requested.');
                 // show the seller location on the map
+                $(':mobile-pagecontainer').pagecontainer('change', '#buyer-seller-driving-directions-map-page', {
+                    reload: false
+                });
+            });
+
+            $(document).on('tap', '#view-buyer-seller-directions-map', function(){ 
                 $(':mobile-pagecontainer').pagecontainer('change', '#buyer-seller-driving-directions-map-page', {
                     reload: false
                 });
@@ -936,7 +965,7 @@
                 console.log('pagehide on view-seller-item-details-page triggered.');
             });
 
-            $(document).on('pageshow', '#view-seller-item-details-page',function(e,data) {
+            $(document).on('pagebeforeshow', '#view-seller-item-details-page',function(e,data) {
                 // set and display the seller's detail info
                 
                 /* couldn't get it to work for checkboxes, even though JSON object contains boolean values
@@ -1045,25 +1074,28 @@
 
         <!-- BEGIN PAGE: View Buyer to Seller driving directions in map -->
         <div data-role="page" id="buyer-seller-driving-directions-map-page">
-            <div data-role="header" data-position="fixed">
+            <div id="bheader" data-role="header" data-position="fixed">
                 <h1>gsgenius</h1>
-                <a href="#address-search-results-map-page" data-icon="navigation" class="ui-btn-left" data-rel="back">Back</a>
+                <!-- <a href="#address-search-results-map-page" data-icon="navigation" class="ui-btn-left" data-enhance="false" data-rel="back">Back</a> -->
+                <button id="back-to-seller-item-details" data-enhance="false">Back</button>
             </div>   
 
-            <div data-role="content" id="buyer-seller-driving-directions-map-div">
-                <div id="b2s-driving-directions-map-canvas" style="height:400px;width:100%;"></div>
+            <div data-role="content" style="padding:0;" id="buyer-seller-driving-directions-map-div">
+                <div id="b2s-driving-directions-map-canvas" style="width:100%;"></div>
             </div>
-
-            <div data-role="footer" data-position="fixed" data-tap-toggle="false">
-                <h3>Footer</h3>
-            </div>    
         </div> 
         <script>
             var b2sDirectionsMap;
 
+            $(document).on('tap', '#back-to-seller-item-details', function(){ 
+                $(':mobile-pagecontainer').pagecontainer('change', '#address-search-results-map-page', {
+                    reload: false
+                });
+            });
+
             $(document).on('pageshow', '#buyer-seller-driving-directions-map-page',function(e,data) {   
                 $('#buyer-seller-driving-directions-map-div').height(getRealContentHeight());
-
+                $('#b2s-driving-directions-map-canvas').css("height", getRealContentHeight());
                 /*
                 console.log('Copying map from previous page div to map div on this page.');
                 $('#b2s-map-canvas').css('display', 'block');
